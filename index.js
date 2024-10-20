@@ -5,23 +5,22 @@ app.use(express.json());
 
 
 // API Routes
-
-// Add Student
-app.post('/api/documents', (req, res) => {
-   
-});
-
 // Get all documents
-app.get('/api/documents/all', (req, res) => {
+app.get('/api/documents', (req, res) => {
    
 });
 
-// Get by ID
+// Get document by ID
 app.get('/api/documents/i/:id', (req, res) => {
-    
+
 });
 
-// Get by Name
-app.get('/api/documents/n/:name', (req, res) => {
-    
+// Create a new document
+app.post('/api/documents', async (req, res) => {
+
+});
+
+// 4. Update a document by ID
+app.put('/api/documents/:id', async (req, res) => {
+
 });
