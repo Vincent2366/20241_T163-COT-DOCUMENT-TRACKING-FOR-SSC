@@ -20,7 +20,13 @@ app.post('/api/documents', async (req, res) => {
 
 });
 
+
 // 4. Update a document by ID
 app.put('/api/documents/:id', async (req, res) => {
+
+});
+
+// Delete a document by ID
+app.delete('/api/documents/:id', async (req, res) => {
 
 });
