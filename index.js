@@ -41,12 +41,3 @@ app.get('/api/transferIn/all', (req, res) => {
 app.get('/api/transferIn/i/:id', (req, res) => {
 
 });
-
-app.get('/api/transferIn//:name', (req, res) => {
-
-});
-
-// Create a new document
-app.post('/api/transferIn', async (req, res) => {
-
-});
