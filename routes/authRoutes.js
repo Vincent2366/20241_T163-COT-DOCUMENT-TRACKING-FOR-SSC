@@ -31,13 +31,13 @@ router.post(
     apiIntegrationController.scheduleReminder   
   );
   
-  router.get(
+router.get(
     "/tasks",
     authMiddleware.authenticate,             
     apiIntegrationController.getTasks          
   );
   
-  router.post(
+router.post(
     "/verify-captcha",
     validationMiddleware.validateCaptchaData,  
     apiIntegrationController.verifyCaptcha      
