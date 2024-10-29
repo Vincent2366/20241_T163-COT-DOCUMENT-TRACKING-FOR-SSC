@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../models/User'); // Mongoose User model example
-const otpService = require('../services/otpService'); // 2FA service example
+const User = require('../models/User'); 
+const otpService = require('../services/otpService'); 
 const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
 
 // Registers a new user
