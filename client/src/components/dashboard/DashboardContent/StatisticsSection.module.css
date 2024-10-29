@@ -1,0 +1,15 @@
+.statisticsContainer {
+    width: 100%;
+  }
+  
+  .chartGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  @media (max-width: 1200px) {
+    .chartGrid {
+      grid-template-columns: 1fr;
+    }
+  }

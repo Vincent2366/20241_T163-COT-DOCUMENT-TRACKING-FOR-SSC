@@ -1,0 +1,228 @@
+.historySection {
+    background-color: #fff;
+    border-radius: 30px;
+    padding: 30px;
+    box-shadow: 0 10px 60px rgba(226, 236, 249, 0.5);
+  }
+  
+  .historyHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .historyTitle {
+    font-size: 35px;
+    font-weight: 600;
+    color: #000;
+  }
+  
+  .controls {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .searchWrapper,
+  .sortWrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: #f9fbff;
+    border-radius: 10px;
+  }
+  
+  .searchInput {
+    border: none;
+    background: none;
+    outline: none;
+    color: #b5b7c0;
+    font-size: 12px;
+  }
+  
+  .transactionTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .transactionTable th {
+    text-align: left;
+    color: #b5b7c0;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .transactionTable td {
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100px; /* Set a fixed width */
+    text-align: center; /* Center the text */
+    background-color: #ffb200;
+    color: #fff;
+    border: 1px solid #ff8a00;
+  }
+  
+  .pending {
+    background-color: rgba(46, 22, 192, 0.38);
+    color: #00058b;
+    border: 1px solid #0007b0;
+  }
+  
+  .inTransit {
+    background-color: #ffb200;
+    color: #fff;
+    border: 1px solid #ff8a00;
+  }
+  
+  .inactive {
+    background-color: #ffc5c5;
+    color: #df0404;
+    border: 1px solid #df0404;
+  }
+  
+  .active {
+    background-color: rgba(76, 175, 80, 0.5);
+    color: #4caf50;
+    border: 1px solid #4caf50;
+  }
+  
+  @media (max-width: 768px) {
+    .historyHeader {
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .controls {
+      width: 100%;
+      flex-direction: column;
+    }
+    
+    .transactionTable {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+
+.pagination {
+  display: flex;
+  justify-content: center; /* Center the pagination */
+  align-items: center;
+  margin-top: 20px; /* Space above the pagination */
+  flex-wrap: wrap; /* Allow wrapping if necessary */
+}
+
+.pagination button {
+  background-color: transparent; /* Button background */
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  padding: 8px 12px; /* Padding for buttons */
+  margin: 0 5px; /* Space between buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.pagination button.active {
+  background-color: purple; /* Active button color */
+  color: white; /* Text color for active button */
+}
+
+.pagination button:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Hover effect */
+}
+
+.sortLabel {
+  font-size: 14px; /* Font size for the label */
+  color: #333; /* Text color */
+  font-weight: 500; /* Font weight */
+}
+
+.sortValue {
+  appearance: none; /* Remove default styling */
+  background-color: #f9fbff; /* Background color */
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 10px; /* Rounded corners */
+  padding: 10px 20px; /* Padding for the select */
+  font-size: 14px; /* Font size */
+  color: #333; /* Text color */
+  cursor: pointer; /* Pointer cursor */
+  transition: border-color 0.3s; /* Transition for border color */
+  width: 150px; /* Fixed width for uniformity */
+}
+
+.sortValue:hover {
+  border-color: #888; /* Change border color on hover */
+}
+
+.sortValue:focus {
+  outline: none; /* Remove default outline */
+  border-color: purple; /* Border color on focus */
+}
+
+/* Optional: Add a custom arrow */
+.sortWrapper::after {
+  content: '▼'; /* Custom arrow */
+  position: absolute;
+  right: 10px; /* Positioning */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust for vertical centering */
+  pointer-events: none; /* Prevent interaction */
+  color: #333; /* Arrow color */
+}
+
+.popup {
+  position: absolute; /* Keep absolute positioning */
+  top: 300px; /* Adjust this value to lower the popup */
+  right: 20px; /* Keep the right position for spacing */
+  width: 400px; /* Set a fixed width for the popup */
+  background-color: #fff; /* Popup background */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+  z-index: 1000; /* Ensure it appears above other content */
+  padding: 20px; /* Padding inside the popup */
+}
+
+.popupContent {
+  max-height: 550px; /* Optional: limit height */
+  overflow-y: auto; /* Enable scrolling if content exceeds height */
+}
+
+.serialNumber {
+  background: none; /* No background */
+  border: none; /* No border */
+  color: #666666; /* Change color to a more appealing shade */
+  cursor: pointer; /* Pointer cursor */
+  font-weight: bold; /* Make it bold */
+  font-size: 16px; /* Increase font size for better visibility */
+  transition: color 0.3s; /* Smooth color transition */
+}
+
+.serialNumber:hover {
+  color: #007bff; /* Change color on hover for interactivity */
+}
+
+.historyEntry {
+  margin-bottom: 15px; /* Space between entries */
+  border-bottom: 1px solid #eee; /* Divider line */
+  padding-bottom: 10px; /* Padding for bottom */
+}
+
+.historyEntry h3 {
+  margin: 0; /* Remove default margin */
+  font-size: 16px; /* Font size for date */
+  color: #555; /* Color for date */
+}
+
+.historyEntry p {
+  margin: 5px 0; /* Space between paragraphs */
+  color: #333; /* Color for text */
+}
