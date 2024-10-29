@@ -55,6 +55,18 @@ userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
 userSchema.index({ status: 1, roles: 1 });
 
+// Add instance methods
+userSchema.methods.toSafeObject = function() {
+  const obj = this.toObject();
+  delete obj.passwordHash;
+  return obj;
+};
+
+// Add static methods
+userSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email: email.toLowerCase() });
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
