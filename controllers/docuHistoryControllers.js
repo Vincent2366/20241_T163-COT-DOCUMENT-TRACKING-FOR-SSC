@@ -1,4 +1,4 @@
-// Controller for document-related operations
+
 const documentController = {};
 
 // Fetch movement history for a specific document by ID
