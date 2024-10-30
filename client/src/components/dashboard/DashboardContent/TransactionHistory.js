@@ -126,6 +126,9 @@ export function TransactionHistory() {
     fetchDocument();
   }, []);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+
   const getSortedData = (data) => {
     if (!data) return [];
     
@@ -137,20 +140,28 @@ export function TransactionHistory() {
     
     switch (sortOption) {
       case 'newest':
-        return filteredData.sort((a, b) => 
-          new Date(b.dateCreated) - new Date(a.dateCreated)
-        );
+        filteredData.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+        break;
       case 'oldest':
-        return filteredData.sort((a, b) => 
-          new Date(a.dateCreated) - new Date(b.dateCreated)
-        );
+        filteredData.sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated));
+        break;
       case 'alphabetical':
-        return filteredData.sort((a, b) => 
-          a.documentName.localeCompare(b.documentName)
-        );
-      default:
-        return filteredData;
+        filteredData.sort((a, b) => a.documentName.localeCompare(b.documentName));
+        break;
     }
+
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+    
+    return {
+      data: paginatedData,
+      totalPages: totalPages
+    };
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   if (loading) {
@@ -174,7 +185,10 @@ export function TransactionHistory() {
               placeholder="Search" 
               aria-label="Search transactions"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
           <div className={styles.sortWrapper}>
@@ -182,7 +196,10 @@ export function TransactionHistory() {
             <select 
               className={styles.sortValue}
               value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
+              onChange={(e) => {
+                setSortOption(e.target.value);
+                setCurrentPage(1);
+              }}
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
@@ -203,7 +220,7 @@ export function TransactionHistory() {
           </tr>
         </thead>
         <tbody>
-          {getSortedData(documentData).map(transaction => (
+          {getSortedData(documentData).data.map(transaction => (
             <tr key={transaction.id}>
               <td>
                 <button 
@@ -264,12 +281,29 @@ export function TransactionHistory() {
         </div>
       )}
       <div className={styles.pagination}>
-        <button> &lt; </button>
-        <button className={styles.active}>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button> &gt; </button>
+        <button 
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        > 
+          &lt; 
+        </button>
+        
+        {Array.from({ length: getSortedData(documentData).totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            className={currentPage === index + 1 ? styles.active : ''}
+            onClick={() => handlePageChange(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+        
+        <button 
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === getSortedData(documentData).totalPages}
+        > 
+          &gt; 
+        </button>
       </div>
     </section>
   );
