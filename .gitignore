@@ -1,8 +1,7 @@
 client/node_modules
 server/node_modules
-.env
-server/.env
-client/.env
+
+
 
 client/package-lock.json
 server/package-lock.json
