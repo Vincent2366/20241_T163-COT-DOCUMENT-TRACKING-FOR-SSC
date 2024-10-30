@@ -93,10 +93,18 @@ export function TransactionHistory() {
   const [sortOption, setSortOption] = useState('newest');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSerialNumberClick = (id) => {
-    setSelectedDocument(id); // Set the selected document ID
-    setDocumentHistory(documentHistories[id]); // Set the history for the selected document
+  const handleSerialNumberClick = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:2000/documents/history/${id}`);
+      const historyData = await response.json();
+      
+      setSelectedDocument(id);
+      setDocumentHistory(historyData);
+    } catch (error) {
+      console.error('Error fetching document history:', error);
+    }
   };
+
   const [documentData, setDocumentData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -200,7 +208,7 @@ export function TransactionHistory() {
               <td>
                 <button 
                   className={styles.serialNumber} 
-                  onClick={() => handleSerialNumberClick(transaction.id)}
+                  onClick={() => handleSerialNumberClick(transaction._id)}
                 >
                   {transaction._id}
                 </button>
@@ -223,17 +231,35 @@ export function TransactionHistory() {
         <div className={styles.popup} onClick={(e) => {
           if (e.target === e.currentTarget) {
             setSelectedDocument(null);
+            setDocumentHistory(null);
           }
         }}>
           <div className={styles.popupContent}>
-            <h2>Document History for {selectedDocument}</h2>
-            {documentHistory.map((entry, index) => (
-              <div key={index} className={styles.historyEntry}>
-                <h3>{entry.date}</h3>
-                <p><strong>{entry.action}</strong></p>
-                <p>{entry.description}</p>
-              </div>
-            ))}
+            <div className={styles.popupHeader}>
+              <h2>Document History for {selectedDocument}</h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => {
+                  setSelectedDocument(null);
+                  setDocumentHistory(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            {!documentHistory ? (
+              <div>Loading history...</div>
+            ) : documentHistory.length === 0 ? (
+              <div>No history available for this document.</div>
+            ) : (
+              documentHistory.map((entry, index) => (
+                <div key={index} className={styles.historyEntry}>
+                  <h3>{entry.date}</h3>
+                  <p><strong>{entry.action}</strong></p>
+                  <p>{entry.description}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}

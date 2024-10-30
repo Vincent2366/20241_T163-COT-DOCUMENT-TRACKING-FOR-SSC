@@ -28,4 +28,27 @@ router.get('/documents/all', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+router.get('/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Fetch the document with its history
+    const document = await AllDocument.findById(id);
+    
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    // If you store history in the document model, return it
+    // You might need to adjust this based on your actual data structure
+    const history = document.history || [];
+    
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching document history:', error);
+    res.status(500).json({ message: 'Error fetching document history' });
+  }
+});
+
 module.exports = router;

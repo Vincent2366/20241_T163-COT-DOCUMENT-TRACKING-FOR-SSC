@@ -180,22 +180,40 @@
 }
 
 .popup {
-  position: absolute; /* Keep absolute positioning */
-  top: 300px; /* Adjust this value to lower the popup */
-  right: 20px; /* Keep the right position for spacing */
-  width: 400px; /* Set a fixed width for the popup */
-  background-color: #fff; /* Popup background */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
-  z-index: 1000; /* Ensure it appears above other content */
-  padding: 20px; /* Padding inside the popup */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .popupContent {
-  max-height: 550px; /* Optional: limit height */
-  overflow-y: auto; /* Enable scrolling if content exceeds height */
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
 }
-
+.popupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
 .serialNumber {
   background: none; /* No background */
   border: none; /* No border */
@@ -211,9 +229,12 @@
 }
 
 .historyEntry {
-  margin-bottom: 15px; /* Space between entries */
-  border-bottom: 1px solid #eee; /* Divider line */
-  padding-bottom: 10px; /* Padding for bottom */
+  border-bottom: 1px solid #eee;
+  padding: 1rem 0;
+}
+
+.historyEntry:last-child {
+  border-bottom: none;
 }
 
 .historyEntry h3 {
