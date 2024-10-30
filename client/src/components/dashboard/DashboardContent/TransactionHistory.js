@@ -90,6 +90,7 @@ const documentHistories = {
 export function TransactionHistory() {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentHistory, setDocumentHistory] = useState(null);
+  const [sortOption, setSortOption] = useState('newest');
 
   const handleSerialNumberClick = (id) => {
     setSelectedDocument(id); // Set the selected document ID
@@ -116,6 +117,29 @@ export function TransactionHistory() {
     fetchDocument();
   }, []);
 
+  const getSortedData = (data) => {
+    if (!data) return [];
+    
+    const sortedData = [...data];
+    
+    switch (sortOption) {
+      case 'newest':
+        return sortedData.sort((a, b) => 
+          new Date(b.dateCreated) - new Date(a.dateCreated)
+        );
+      case 'oldest':
+        return sortedData.sort((a, b) => 
+          new Date(a.dateCreated) - new Date(b.dateCreated)
+        );
+      case 'alphabetical':
+        return sortedData.sort((a, b) => 
+          a.documentName.localeCompare(b.documentName)
+        );
+      default:
+        return sortedData;
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -123,7 +147,7 @@ export function TransactionHistory() {
   return (
     <section className={styles.historySection}>
       <header className={styles.historyHeader}>
-        <h1 className={styles.historyTitle}>History</h1>
+        <h1 className={styles.historyTitle}>Transactions</h1>
         <div className={styles.controls}>
           <div className={styles.searchWrapper}>
             <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/f2a2d5994f3e7591026d17b75e05a400996b2106b14f2cd9dad3595ff535358b?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" alt="" className={styles.searchIcon} />
@@ -131,7 +155,11 @@ export function TransactionHistory() {
           </div>
           <div className={styles.sortWrapper}>
             <span className={styles.sortLabel}>Sort by: </span>
-            <select className={styles.sortValue}>
+            <select 
+              className={styles.sortValue}
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+            >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
               <option value="alphabetical">Alphabetical</option>
@@ -151,7 +179,7 @@ export function TransactionHistory() {
           </tr>
         </thead>
         <tbody>
-          {documentData.map(transaction => (
+          {getSortedData(documentData).map(transaction => (
             <tr key={transaction.id}>
               <td>
                 <button 
