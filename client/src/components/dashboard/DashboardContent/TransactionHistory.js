@@ -91,6 +91,7 @@ export function TransactionHistory() {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentHistory, setDocumentHistory] = useState(null);
   const [sortOption, setSortOption] = useState('newest');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSerialNumberClick = (id) => {
     setSelectedDocument(id); // Set the selected document ID
@@ -120,23 +121,27 @@ export function TransactionHistory() {
   const getSortedData = (data) => {
     if (!data) return [];
     
-    const sortedData = [...data];
+    let filteredData = data.filter(item => 
+      item.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item._id.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     
     switch (sortOption) {
       case 'newest':
-        return sortedData.sort((a, b) => 
+        return filteredData.sort((a, b) => 
           new Date(b.dateCreated) - new Date(a.dateCreated)
         );
       case 'oldest':
-        return sortedData.sort((a, b) => 
+        return filteredData.sort((a, b) => 
           new Date(a.dateCreated) - new Date(b.dateCreated)
         );
       case 'alphabetical':
-        return sortedData.sort((a, b) => 
+        return filteredData.sort((a, b) => 
           a.documentName.localeCompare(b.documentName)
         );
       default:
-        return sortedData;
+        return filteredData;
     }
   };
 
@@ -150,8 +155,19 @@ export function TransactionHistory() {
         <h1 className={styles.historyTitle}>Transactions</h1>
         <div className={styles.controls}>
           <div className={styles.searchWrapper}>
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/f2a2d5994f3e7591026d17b75e05a400996b2106b14f2cd9dad3595ff535358b?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" alt="" className={styles.searchIcon} />
-            <input type="search" className={styles.searchInput} placeholder="Search" aria-label="Search transactions" />
+            <img 
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/f2a2d5994f3e7591026d17b75e05a400996b2106b14f2cd9dad3595ff535358b?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" 
+              alt="" 
+              className={styles.searchIcon} 
+            />
+            <input 
+              type="search" 
+              className={styles.searchInput} 
+              placeholder="Search" 
+              aria-label="Search transactions"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <div className={styles.sortWrapper}>
             <span className={styles.sortLabel}>Sort by: </span>
