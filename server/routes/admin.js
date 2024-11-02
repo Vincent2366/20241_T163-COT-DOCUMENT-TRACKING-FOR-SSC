@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { isAdmin } = require('../middlewares/auth');
 const Organization = require('../models/Organization');
-const User = require('../models/User');
+const User = require('../models/UserLoginModel');
 
 // Register a new student organization (SSC Admin only)
 router.post('/organizations', async (req, res) => {

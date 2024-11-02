@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // Adjust path to your User model
+const User = require('../models/UserLoginModel'); // Adjust path to your User model
 const bcrypt = require('bcryptjs');
 
 // User registration route

@@ -1,4 +1,3 @@
-
 const documentController = {};
 
 // Fetch movement history for a specific document by ID
@@ -28,14 +27,5 @@ documentController.getAllDocumentHistory = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving document transfer history', error });
     }
 };
-
-// // Mock functions for demonstration (replace with actual database functions)
-// async function getDocumentHistoryById(id) {
-//     // Logic to get document history by ID
-// }
-
-// async function getAllDocumentHistory(filters) {
-//     // Logic to get all document history with filters
-// }
 
 module.exports = documentController;

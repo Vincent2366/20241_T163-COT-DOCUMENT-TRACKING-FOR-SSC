@@ -1,0 +1,20 @@
+{
+  "name": "20241_t163-cot-document-tracking-for-ssc",
+  "version": "1.0.0",
+  "description": "BSIT 3C",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vincent2366/20241_T163-COT-DOCUMENT-TRACKING-FOR-SSC.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vincent2366/20241_T163-COT-DOCUMENT-TRACKING-FOR-SSC/issues"
+  },
+  "homepage": "https://github.com/Vincent2366/20241_T163-COT-DOCUMENT-TRACKING-FOR-SSC#readme"
+}

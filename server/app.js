@@ -6,6 +6,7 @@ const documentRoutes = require('./routes/document');
 const userRoutes = require('./routes/userRoutes'); // Ensure this path is correct
 const testUserRoutes = require('./routes/testUser');
 const cors = require('cors');
+const newDocumentRoutes = require('./routes/newDocumentRoutes');
 
 require('dotenv').config(); 
 const app = express();
@@ -19,7 +20,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/documents', documentRoutes);
 app.use('/api/users', userRoutes); // Ensure this line is present
 app.use('/api/testUser', testUserRoutes);
-
+app.use('/api/documents/new', newDocumentRoutes);
 
 console.log(process.env.MONGODB_URI);
 
