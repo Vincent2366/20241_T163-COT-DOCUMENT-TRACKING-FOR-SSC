@@ -1,91 +1,5 @@
 import styles from './TransactionHistory.module.css';
 import { useState, useEffect } from 'react';
-// import { format } from 'date-fns';
-const transactions = [
-  {
-    id: "00001",
-    name: "Microsoft",
-    recipient: "ComSoc",
-    date: "1/03/2023",
-    modified: "2 hours ago",
-    status: "Pending"
-  },
-  {
-    id: "00002",
-    name: "Yahoo",
-    recipient: "Matigda",
-    date: "1/03/2023",
-    modified: "a week ago",
-    status: "In Transit"
-  },
-  {
-    id: "00003",
-    name: "Adobe",
-    recipient: "SBO",
-    date: "1/03/2023",
-    modified: "15 minutes ago",
-    status: "Inactive"
-  },
-  {
-    id: "00004",
-    name: "Tesla",
-    recipient: "SBO",
-    date: "1/03/2023",
-    modified: "a week ago",
-    status: "Pending"
-  },
-  {
-    id: "00005",
-    name: "Google",
-    recipient: "(629) 555-0129",
-    date: "jerome@google.com",
-    modified: "Réunion",
-    status: "Active"
-  },
-  {
-    id: "00006",
-    name: "Microsoft",
-    recipient: "ComSoc",
-    date: "1/03/2023",
-    modified: "2 hours ago",
-    status: "Active"
-  },
-  // ... more transactions
-];
-
-const documentHistories = {
-  "00001": [
-    { date: "Dec 12", action: "Received at Matigda", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-    { date: "Dec 15", action: "Processed for delivery", description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-    { date: "Dec 18", action: "Shipped to recipient", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." },
-    { date: "Dec 20", action: "Delivered to recipient", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-  ],
-  "00002": [
-    { date: "Nov 18", action: "Transferred out from Matigda", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hac at mattis egestas." },
-  ],
-  "00003": [
-    { date: "Oct 20", action: "Received at SBO", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-    { date: "Oct 22", action: "Processed for delivery", description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-    { date: "Oct 25", action: "Shipped to recipient", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." },
-    { date: "Oct 27", action: "Delivered to recipient", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-  ],
-  "00004": [
-    { date: "Sep 15", action: "Transferred out from SBO", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hac at mattis egestas." },
-  ],
-  "00005": [
-    { date: "Aug 10", action: "Received at Réunion", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-    { date: "Aug 12", action: "Processed for delivery", description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-    { date: "Aug 15", action: "Shipped to recipient", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." },
-    { date: "Aug 17", action: "Delivered to recipient", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-  ],
-  "00006": [
-    { date: "Jul 5", action: "Received at ComSoc", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-    { date: "Jul 7", action: "Processed for delivery", description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-    { date: "Jul 10", action: "Shipped to recipient", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." },
-    { date: "Jul 12", action: "Delivered to recipient", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper ullamcorper quis." },
-  ],
-  // Add more document histories as needed
-};
 
 export function TransactionHistory() {
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -129,24 +43,32 @@ export function TransactionHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
+  const formatDate = (dateString) => {
+    try {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '-';
+    }
+  };
+
   const getSortedData = (data) => {
     if (!data) return [];
     
     let filteredData = data.filter(item => 
       item.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item._id.toLowerCase().includes(searchTerm.toLowerCase())
+      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
     switch (sortOption) {
       case 'newest':
-        filteredData.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+        filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       case 'oldest':
-        filteredData.sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated));
-        break;
-      case 'alphabetical':
-        filteredData.sort((a, b) => a.documentName.localeCompare(b.documentName));
+        filteredData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         break;
     }
 
@@ -203,7 +125,6 @@ export function TransactionHistory() {
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
-              <option value="alphabetical">Alphabetical</option>
             </select>
           </div>
         </div>
@@ -221,19 +142,19 @@ export function TransactionHistory() {
         </thead>
         <tbody>
           {getSortedData(documentData).data.map(transaction => (
-            <tr key={transaction.id}>
+            <tr key={transaction._id}>
               <td>
                 <button 
                   className={styles.serialNumber} 
                   onClick={() => handleSerialNumberClick(transaction._id)}
                 >
-                  {transaction._id}
+                  {transaction.serialNumber}
                 </button>
               </td>
               <td>{transaction.documentName}</td>
               <td>{transaction.recipient}</td>
-              <td>{transaction.dateCreated}</td>
-              <td>{transaction.lastModified}</td>
+              <td>{formatDate(transaction.createdAt)}</td>
+              <td>{formatDate(transaction.modified)}</td>
               <td>
                 <span className={`${styles.status} ${styles[transaction.status.toLowerCase().replace(" ", "")]}`}>
                   {transaction.status}

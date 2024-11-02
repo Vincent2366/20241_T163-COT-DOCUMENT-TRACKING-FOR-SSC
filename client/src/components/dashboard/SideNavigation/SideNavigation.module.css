@@ -97,6 +97,22 @@
   background-color: #0000CC;
 }
 
+.success {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
 /* Styles for the Modal title */
 .modalTitle {
   font-size: 24px;
@@ -114,4 +130,18 @@
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.input[type="datetime-local"] {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 14px;
+}
+
+/* Optional: Style the calendar icon */
+.input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 2px;
 }

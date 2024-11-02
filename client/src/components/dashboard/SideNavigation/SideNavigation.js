@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import styles from './SideNavigation.module.css';
 import { NavigationItem } from './NavigationItem';
 import Modal from '../../Modal'; // Adjust the path as necessary
+import axios from 'axios';
+
+axios.defaults.baseURL = 'http://localhost:2000'; // or whatever port your backend is running on
 
 const navigationItems = [
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/005c7a1fc7b800da9ed0eb7da389c028dba409099cc177f99c94e1fb260ee196?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", label: "Dashboard", isActive: true, link: "/dashboard" },
@@ -30,6 +33,7 @@ const manageItems = [
 const SideNavigation = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
   const navigate = useNavigate(); // Initialize useNavigate
   const [recipients, setRecipients] = useState([
     'SSC',
@@ -37,13 +41,25 @@ const SideNavigation = () => {
     'COMSOC',
     // Add more recipients as needed
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [currentDateTime, setCurrentDateTime] = useState(() => {
+    const now = new Date();
+    return now.toISOString().slice(0, 16); // Format: "YYYY-MM-DDThh:mm"
+  });
 
   const handleItemClick = (label) => {
     if (label === "Dashboard") {
-      navigate('/dashboard'); // Redirect to /dashboard
+      navigate('/dashboard');
+    } else if (label === "New Document") {
+      setModalTitle("New Document");
+      setModalContent("new-document");
+      setModalOpen(true);
     } else {
+      setModalTitle(label);
       setModalContent(label);
-      setModalOpen(true); // Open the modal for other items
+      setModalOpen(true);
     }
   };
 
@@ -51,10 +67,45 @@ const SideNavigation = () => {
     setModalOpen(false);
   };
 
-  const handleSubmit = () => {
-    // Add your form submission logic here
-    console.log('Form submitted');
-    closeModal();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.target);
+    const documentData = {
+      serialNumber: formData.get('serialNumber'),
+      documentName: formData.get('documentName'),
+      recipient: formData.get('recipient'),
+      userId: formData.get('userId'),
+      remarks: formData.get('remarks'),
+      status: 'pending',
+      createdAt: formData.get('createdAt') || new Date().toISOString(),
+    };
+
+    console.log('Sending document data:', documentData);
+
+    try {
+      const response = await axios.post('/api/documents/new', documentData);
+      console.log('Response:', response.data);
+      
+      setSuccessMessage('Document created successfully!');
+      setTimeout(() => {
+        setSuccessMessage('');
+        closeModal();
+      }, 2000);
+      
+      e.target.reset();
+      
+    } catch (err) {
+      console.error('Error response:', err.response?.data);
+      setError(
+        err.response?.data?.message || 
+        'Failed to create document. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -81,40 +132,74 @@ const SideNavigation = () => {
       ))}
       
       {/* Modal */}
-      <Modal isOpen={isModalOpen} onClose={closeModal} title="Transfer In">
-        <div className={styles.modalContent}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Serial Number</label>
-            <input type="text" placeholder="Enter Serial Number" className={styles.input} />
-          </div>
-          
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Document Name</label>
-            <input type="text" placeholder="Enter Document Name" className={styles.input} />
-          </div>
-          
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Recipient</label>
-            <select className={styles.select}>
-              <option value="">Select Recipient</option>
-              {recipients.map((recipient, index) => (
-                <option key={index} value={recipient}>{recipient}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className={styles.formGroup}>
-            <label className={styles.label}>User ID</label>
-            <input type="text" placeholder="Enter User ID" className={styles.input} />
-          </div>
-          
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Remarks</label>
-            <textarea placeholder="Enter remarks..." className={styles.textarea}></textarea>
-          </div>
-          
-          <button className={styles.submitButton} onClick={handleSubmit}>Submit</button>
-        </div>
+      <Modal isOpen={isModalOpen} onClose={closeModal} title={modalTitle}>
+        {modalContent === "new-document" && (
+          <form className={styles.modalContent} onSubmit={handleSubmit}>
+            {error && <div className={styles.error}>{error}</div>}
+            {successMessage && <div className={styles.success}>{successMessage}</div>}
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Serial Number</label>
+              <input 
+                name="serialNumber"
+                type="text" 
+                placeholder="Enter Serial Number (e.g. 24-1)" 
+                className={styles.input}
+                required 
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Document Name</label>
+              <input 
+                name="documentName"
+                type="text" 
+                placeholder="Enter Document Name" 
+                className={styles.input}
+                required 
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Recipient</label>
+              <select name="recipient" className={styles.select} required>
+                <option value="">Select Recipient</option>
+                {recipients.map((recipient, index) => (
+                  <option key={index} value={recipient}>{recipient}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label}>User ID</label>
+              <input 
+                name="userId"
+                type="text" 
+                placeholder="Enter User ID" 
+                className={styles.input}
+                required 
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Remarks</label>
+              <textarea 
+                name="remarks"
+                placeholder="Enter remarks..." 
+                className={styles.textarea}
+              ></textarea>
+            </div>
+            
+           
+            
+            <button 
+              type="submit" 
+              className={styles.submitButton}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating...' : 'Create Document'}
+            </button>
+          </form>
+        )}
       </Modal>
     </nav>
   );
