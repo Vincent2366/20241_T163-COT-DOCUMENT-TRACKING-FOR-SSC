@@ -1,0 +1,81 @@
+/* src/components/Modal.css */
+.modal-overlay {
+  display: flex;
+  position: fixed;
+  z-index: 1000; /* Ensure it's above other elements */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Darker semi-transparent background */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  opacity: 0; /* Start hidden */
+  transition: opacity 0.3s ease; /* Fade in effect */
+}
+
+.modal-overlay.show {
+  opacity: 1; /* Fully visible when shown */
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px; /* Increased padding for better spacing */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+  max-width: 500px; /* Limit width */
+  width: 90%; /* Responsive width */
+  position: relative; /* Ensure it positions correctly */
+  transform: translateY(-30px); /* Start slightly above */
+  animation: slideIn 0.3s forwards; /* Slide in animation */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-30px); /* Start position */
+    opacity: 0; /* Start hidden */
+  }
+  to {
+    transform: translateY(0); /* End position */
+    opacity: 1; /* Fully visible */
+  }
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  position: absolute; /* Position close button */
+  top: 15px; /* Adjust as needed */
+  right: 15px; /* Adjust as needed */
+}
+
+h2 {
+  margin-bottom: 20px; /* Space below the title */
+  font-size: 28px; /* Slightly larger title font size */
+  font-weight: bold; /* Bold title */
+  color: #6B7280; /* Grayish color for the title */
+}
+
+/* Input styles */
+input, textarea {
+  width: 100%; /* Full width */
+  padding: 10px; /* Padding for inputs */
+  margin-bottom: 15px; /* Space between inputs */
+  border: 1px solid #ccc; /* Border for inputs */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 16px; /* Font size for inputs */
+}
+
+textarea {
+  height: 100px; /* Set height for textarea */
+  resize: none; /* Prevent resizing */
+}
+
+/* Label styles */
+label {
+  font-weight: bold; /* Bold labels */
+  margin-bottom: 5px; /* Space below labels */
+  display: block; /* Make labels block elements */
+}

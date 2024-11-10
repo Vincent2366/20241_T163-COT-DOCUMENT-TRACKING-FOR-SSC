@@ -1,27 +1,29 @@
 {
-  "name": "20241_t163-cot-document-tracking-for-ssc",
+  "name": "doctrack",
   "version": "1.0.0",
   "description": "BSIT 3C",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Vincent2366/20241_T163-COT-DOCUMENT-TRACKING-FOR-SSC.git"
+    "url": "git+https://github.com/FrenceAlbarracin/Doctrack.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Vincent2366/20241_T163-COT-DOCUMENT-TRACKING-FOR-SSC/issues"
+    "url": "https://github.com/FrenceAlbarracin/Doctrack/issues"
   },
-  "homepage": "https://github.com/Vincent2366/20241_T163-COT-DOCUMENT-TRACKING-FOR-SSC#readme",
+  "homepage": "https://github.com/FrenceAlbarracin/Doctrack#readme",
   "dependencies": {
+    "@react-oauth/google": "^0.12.1",
+    "axios": "^1.7.7",
     "dotenv": "^16.4.5",
-    "express": "^4.21.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.7"
+    "jwt-decode": "^4.0.0",
+    "mongoose": "^8.8.0",
+    "react-router-dom": "^6.27.0"
   }
 }
