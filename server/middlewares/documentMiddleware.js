@@ -13,7 +13,7 @@ exports.validateDocument = async (req, res, next) => {
         res.status(500).json({ error: 'Error validating document' });
     }
 };
-
+ 
 // Validate document transfer permissions
 exports.validateTransfer = async (req, res, next) => {
     try {

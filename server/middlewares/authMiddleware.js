@@ -20,7 +20,7 @@ exports.authenticate = (req, res, next) => {
   if (!token) {
     return res.status(403).json({ message: "No token provided." });
   }
-
+ 
   // Logic to verify token (using JWT or similar)
   try {
     // const decoded = jwt.verify(token, "YOUR_SECRET_KEY");

@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
             },
             message: 'Please use a valid BukSU student email'
         }
-    },
+    }, 
     password: {
         type: String,
         required: true,

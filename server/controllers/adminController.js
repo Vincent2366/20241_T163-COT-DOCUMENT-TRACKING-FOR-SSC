@@ -27,3 +27,4 @@ exports.deleteUser = (req, res) => {
     // Assuming success here
     res.status(200).json({ message: `User ${id} deleted successfully` });
 };
+ 

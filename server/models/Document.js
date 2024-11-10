@@ -21,7 +21,7 @@ const documentSchema = new mongoose.Schema({
     },
     remarks: {
         type: String,
-    },
+    }, 
     status: {
         type: String,
         enum: ['pending', 'in-transit', 'delivered', 'rejected'],

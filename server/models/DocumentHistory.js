@@ -21,3 +21,4 @@ const documentHistorySchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('DocumentHistory', documentHistorySchema);
+ 

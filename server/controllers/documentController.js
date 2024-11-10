@@ -19,7 +19,7 @@ exports.createDocument = async (req, res) => {
             currentLocation,
             originOffice,
             dateCreated: new Date(),
-            status: 'pending'
+            status: 'pending' 
         });
 
         await newDocument.save();

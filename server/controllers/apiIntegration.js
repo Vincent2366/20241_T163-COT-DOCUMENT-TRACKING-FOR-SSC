@@ -10,4 +10,4 @@ exports.scheduleReminder = (req, res) => {
   exports.verifyCaptcha = (req, res) => {
     res.send("CAPTCHA verified successfully");
   };
-  
+   

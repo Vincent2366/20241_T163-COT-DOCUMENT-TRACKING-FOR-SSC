@@ -15,7 +15,7 @@ exports.registerUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Failed to register user' });
   }
-};
+}; 
 
 // Authenticates a user and returns a JWT
 exports.loginUser = async (req, res) => {

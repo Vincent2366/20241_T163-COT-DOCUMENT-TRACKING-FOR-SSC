@@ -14,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
             error: 'This email or username is already registered'
         });
     }
-
+ 
     res.status(500).json({
         success: false,
         error: 'Something went wrong on the server'

@@ -15,7 +15,7 @@ documentController.getDocumentHistoryById = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving document history', error });
     }
 };
-
+ 
 // Fetch all document transfer history with optional filters
 documentController.getAllDocumentHistory = async (req, res) => {
     try {
