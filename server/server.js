@@ -5,6 +5,7 @@ const documentRoutes = require('./routes/document');
 const newDocumentRoutes = require('./routes/newDocumentRoutes');
 const organizationRoutes = require('./routes/organizationRoutes');
 
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/documents/new', newDocumentRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.get('/api/organizations', organizationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

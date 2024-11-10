@@ -24,7 +24,8 @@ const Management = [
     label: "Manage Users" 
   },
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/fdf6a3c79bdaad8ecf0558b37a861092b45999045f1f0e63787a112b3c20be64?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
-    label: "Manage Organizations" 
+    label: "Manage Organizations", 
+    link: "/admin/manage-organizations" 
   }
 ];
 
@@ -112,7 +113,7 @@ const AdminSideNavigation = () => {
 
         <h2 className={styles.sectionTitle}>Management</h2>
         {Management.map((item, index) => (
-          <div key={index} onClick={() => handleItemClick(item.label)}>
+          <div key={index} onClick={() => handleItemClick(item.label, item.link)}>
             <NavigationItem {...item} />
           </div>
         ))}

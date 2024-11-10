@@ -31,11 +31,13 @@ class OrganizationController {
 
   // Get all organizations
   static async getAllOrganizations(req, res) {
+    console.log('asdasd');
+    
     try {
-      const organizations = await Organization.find();
-      res.status(200).json(organizations);
+      const organizations = await Organization.find(); 
+      res.status(200).json(organizations); 
     } catch (error) {
-      res.status(500).json({ message: 'Error retrieving organizations', error });
+      res.status(500).json({ message: 'Error retrieving organizations', error }); // Handle any errors
     }
   }
 
