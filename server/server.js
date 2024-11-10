@@ -21,7 +21,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/documents/new', newDocumentRoutes);
 app.use('/api/organizations', organizationRoutes);
-app.get('/api/organizations', organizationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
