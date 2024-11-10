@@ -1,13 +1,9 @@
 const mongoose = require('mongoose');
 
 const organizationSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    orgType: { type: String, required: true },
-    college: { type: String, required: true },
-    president: { type: String, required: true },
-    adviser: { type: String, required: true },
-    academicYear: { type: String, required: true },
-});
+    name: { type: String, required: [true, 'Organization name is required'] },
+    organizationId: { type: String, required: [true, 'Organization ID is required'], unique: true },
+}, { timestamps: true });
 
 const Organization = mongoose.model('Organization', organizationSchema);
 

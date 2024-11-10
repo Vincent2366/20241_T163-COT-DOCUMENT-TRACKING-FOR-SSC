@@ -3,6 +3,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const documentRoutes = require('./routes/document');
 const newDocumentRoutes = require('./routes/newDocumentRoutes');
+const organizationRoutes = require('./routes/organizationRoutes');
 
 const express = require('express');
 const cors = require('cors');
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/documents/new', newDocumentRoutes);
+app.use('/api/organizations', organizationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -32,7 +34,7 @@ mongoose.connect(process.env.MONGODB_URI)
     })
     .catch(err => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 2000;
+const PORT = process.env.PORT || 2000 || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
