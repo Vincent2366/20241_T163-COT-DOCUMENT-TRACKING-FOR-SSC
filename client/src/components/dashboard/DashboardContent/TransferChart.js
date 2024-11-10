@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './TransferChart.module.css';
 
 export const TransferChart = () => {
-  const [dailyData] = useState([
-    { day: 'M', value: 44 },
-    { day: 'T', value: 127 },
-    { day: 'W', value: 76 },
-    { day: 'T', value: 98 },
-    { day: 'F', value: 172 },
-    { day: 'S', value: 16 },
-    { day: 'Today', value: 16 }
-  ]);
+  const [dailyData, setDailyData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const maxHeight = 172;
+  useEffect(() => {
+    const fetchDailyStats = async () => {
+      try {
+        const response = await fetch('http://localhost:2000/api/documents/daily-stats');
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data = await response.json();
+        setDailyData(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchDailyStats();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!dailyData.length) return <div>No data available</div>;
+
+  const maxHeight = Math.max(...dailyData.map(item => item.value));
 
   return (
     <div className={styles.chartContainer}>
@@ -27,7 +42,7 @@ export const TransferChart = () => {
             <div
               className={styles.bar}
               style={{
-                height: `${(item.value / maxHeight) * 200}px`
+                height: `${(item.value / (maxHeight || 1)) * 200}px`
               }}
               role="img"
               aria-label={`${item.day}: ${item.value} transfers`}
