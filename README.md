@@ -9,3 +9,9 @@ John Real L. Lagare
 Bryan Vonn Y. Pagaran
 Von Brian Libertad
 Vincent Paul Faustus Miguel
+
+
+
+Credentials: 
+Admin Username: admin@buksu.edu.ph
+Admin Password: admin123
