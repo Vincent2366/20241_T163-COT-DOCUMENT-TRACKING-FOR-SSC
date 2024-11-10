@@ -15,3 +15,4 @@ const isOfficer = (req, res, next) => {
 };
 
 module.exports = { isAdmin, isOfficer };
+  
