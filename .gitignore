@@ -4,8 +4,8 @@ package-lock.json
 client/node_modules
 server/node_modules
 
-server/.env
+# server/.env
 client/package-lock.json
 server/package-lock.json
 
-.env
+# .env
