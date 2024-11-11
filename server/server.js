@@ -4,7 +4,7 @@ const authRoutes = require('./routes/authRoutes');
 const documentRoutes = require('./routes/document');
 const newDocumentRoutes = require('./routes/newDocumentRoutes');
 const organizationRoutes = require('./routes/organizationRoutes');
-
+const userRoutes = require ('./routes/userRoutes')
 
 const express = require('express');
 const cors = require('cors');
@@ -12,7 +12,10 @@ const mongoose = require('mongoose');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Your React app's URL
+  credentials: true
+}));
 app.use(express.json());
 
 
@@ -21,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/documents/new', newDocumentRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.use('/api/users',userRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

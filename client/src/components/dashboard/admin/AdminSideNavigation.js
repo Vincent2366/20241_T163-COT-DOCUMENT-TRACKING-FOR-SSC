@@ -7,7 +7,6 @@ import Modal from '../../Modal';
 const adminNavigationItems = [
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/005c7a1fc7b800da9ed0eb7da389c028dba409099cc177f99c94e1fb260ee196?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
     label: "Dashboard", 
-    isActive: true, 
     link: "/admin/dashboard" 
   },
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/ef14105a500b66854f89c5620f3d32e2a5dbaf09c38aedabb17f4c76b9ab15f4?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
@@ -21,11 +20,12 @@ const adminNavigationItems = [
 
 const Management = [
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/fdf6a3c79bdaad8ecf0558b37a861092b45999045f1f0e63787a112b3c20be64?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
-    label: "Manage Users" 
+    label: "Manage Users",
+    link: "/admin/manage-users"
   },
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/fdf6a3c79bdaad8ecf0558b37a861092b45999045f1f0e63787a112b3c20be64?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
     label: "Manage Organizations", 
-    link: "/admin/manage-organizations" 
+    link: "/admin/manage-organizations"
   }
 ];
 
@@ -42,7 +42,11 @@ const AdminSideNavigation = () => {
     if (link) {
       if (label === "Add New Organization") {
         setAddOrgModalOpen(true);
-      } else {
+      } else if (label === "Dashboard") {
+        navigate(link);
+      }else if (label === "Manage Organizations") {
+        navigate(link);
+      } else if (label === "Manage Users") {
         navigate(link);
       }
     }
