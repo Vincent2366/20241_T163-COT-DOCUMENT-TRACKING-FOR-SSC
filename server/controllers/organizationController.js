@@ -31,6 +31,7 @@ class OrganizationController {
 
   // Get all organizations
   static async getAllOrganizations(req, res) {
+   
     try {
       const organizations = await Organization.find(); 
       res.status(200).json(organizations); 
@@ -63,7 +64,7 @@ class OrganizationController {
       }
       res.status(200).json(updatedOrganization);
     } catch (error) {
-      if (error.name === 'ValidationError') {
+      if (error.name === 'ValidationError') { 
         return res.status(400).json({ message: error.message });
       }
       res.status(500).json({ message: 'Error updating organization', error });

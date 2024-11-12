@@ -8,6 +8,8 @@ export function ManageOrg() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editOrg, setEditOrg] = useState({ id: '', name: '', status: '' });
 
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -47,6 +49,61 @@ export function ManageOrg() {
   // Slice the data for the current page
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  const handleEdit = (org) => {
+    setEditOrg({ id: org._id, name: org.name, status: org.status });
+    setIsEditModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleSave = async () => {
+    console.log('Saving organization:', editOrg);
+    if (!editOrg.name || !editOrg.status) {
+      console.error('Name and status are required fields.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:2000/api/organizations/${editOrg.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editOrg.name,
+          status: editOrg.status,
+        }),
+      });
+
+      console.log('Response:', response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error details:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const updatedData = await response.json();
+      console.log('Updated organization data:', updatedData);
+
+      setOrgData((prevData) =>
+        prevData.map((org) => (org._id === updatedData._id ? updatedData : org))
+      );
+
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error updating organization:', error);
+    }
+  };
+
+  const handleDelete = (orgId) => {
+    // Logic for deleting the organization
+    console.log('Delete organization with ID:', orgId);
+    // You might want to add a confirmation dialog before deletion
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -67,6 +124,7 @@ export function ManageOrg() {
           <tr>
             <th>Organization ID</th>
             <th>Organization Name</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -76,14 +134,17 @@ export function ManageOrg() {
               <tr key={org._id}>
                 <td>{org.organizationId}</td>
                 <td>{org.name}</td>
+                <td>{org.status}</td>
                 <td>
-                  <button onClick={() => setSelectedOrg(org)}>View Details</button>
+                  <button onClick={() => handleEdit(org)}>Edit</button>
+                  <span style={{ margin: '0 8px' }}></span>
+                  <button onClick={() => handleDelete(org._id)}>Delete</button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>
+              <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
                 No organizations found
               </td>
             </tr>
@@ -118,14 +179,32 @@ export function ManageOrg() {
         </button>
       </div>
 
-      {/* Popup for organization details */}
-      {selectedOrg && (
-        <div className={styles.popup} onClick={() => setSelectedOrg(null)}>
-          <div className={styles.popupContent}>
-            <h2>Details for {selectedOrg.name}</h2>
-            <p>ID: {selectedOrg.organizationId}</p>
-            {/* Add more details as needed */}
-            <button onClick={() => setSelectedOrg(null)}>Close</button>
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className={styles.popup} onClick={handleModalClose}>
+          <div className={styles.popupContent} onClick={(e) => e.stopPropagation()}>
+            <h2>Edit Organization</h2>
+            <label>
+              Name:
+              <input
+                type="text"
+                value={editOrg.name}
+                onChange={(e) => setEditOrg({ ...editOrg, name: e.target.value })}
+              />
+            </label>
+            <label>
+              Status:
+              <select
+                value={editOrg.status}
+                onChange={(e) => setEditOrg({ ...editOrg, status: e.target.value })}
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                {/* Add more status options as needed */}
+              </select>
+            </label>
+            <button onClick={handleSave}>Save</button>
+            <button onClick={handleModalClose}>Cancel</button>
           </div>
         </div>
       )}
