@@ -1,15 +1,41 @@
-import React from 'react';
-import './forpass.css'; // Import the CSS file for styling
+import React, { useState } from 'react';
+import './forpass.css';
 import logo from '../assets/logo.png';
-import { useNavigate } from 'react-router-dom'; // Use the navigate hook for redirecting
+import { useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform any validation or API call here, then navigate to enter-code
-    navigate('/enter-code');
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:2000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        sessionStorage.setItem('resetEmail', email);
+        navigate('/enter-code');
+      } else {
+        setError(data.error || 'Failed to send verification code');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,10 +53,25 @@ const ForgotPassword = () => {
           <p style={{ marginBottom: '100px' }}>Find Your Account</p>
           <form onSubmit={handleSubmit}>
             <label>Enter institutional email address</label>
-            <input type="text" placeholder="Username or email address" required />
-            <label style={{ color: 'gray', marginBottom: '100px' }}>You may receive a code to your institutional account for security and login purposes</label>
+            <input 
+              type="email" 
+              placeholder="Username or email address" 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <label style={{ color: 'gray', marginBottom: '100px' }}>
+              You may receive a code to your institutional account for security and login purposes
+            </label>
+            {error && <p style={{ color: 'red', margin: '10px 0' }}>{error}</p>}
             <br />
-            <button type="submit" className="sign-in-btn">Continue</button>
+            <button 
+              type="submit" 
+              className="sign-in-btn"
+              disabled={loading}
+            >
+              {loading ? 'Sending...' : 'Continue'}
+            </button>
           </form>
         </div>
       </div>

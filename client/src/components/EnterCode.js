@@ -1,25 +1,80 @@
-import React, { useState } from 'react';
-import './forpass.css'; // Reuse the same CSS for styling consistency
+import React, { useState, useEffect } from 'react';
+import './forpass.css';
 import logo from '../assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
 
 const EnterCode = () => {
-  const [verificationCode, setVerificationCode] = useState(''); // Store the verification code
-  const [error, setError] = useState(''); // Handle errors
-  const navigate = useNavigate(); // For navigating to the Change Password page
+  const [verificationCode, setVerificationCode] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // For simplicity, let's assume the correct code is '123456'
-    const correctCode = '123456';
-
-    if (verificationCode === correctCode) {
-      // If the code is correct, navigate to the Change Password page
-      navigate('/change-password');
+  useEffect(() => {
+    // Get email from sessionStorage that was stored in ForgotPassword component
+    const resetEmail = sessionStorage.getItem('resetEmail');
+    if (!resetEmail) {
+      navigate('/forgot-password');
     } else {
-      // If the code is wrong, display an error message
-      setError('Invalid verification code. Please try again.');
+      setEmail(resetEmail);
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:2000/api/auth/verify-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          code: verificationCode
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the reset token for the next step
+        sessionStorage.setItem('resetToken', data.resetToken);
+        navigate('/change-password');
+      } else {
+        setError(data.error || 'Verification failed');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:2000/api/auth/resend-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Resending code failed');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +112,7 @@ const EnterCode = () => {
           </form>
           
           <p>
-            Didn't receive a code? <Link to="/forgot-password" className="resend-link">Resend Code</Link>
+            Didn't receive a code? <Link to="/forgot-password" className="resend-link" onClick={handleResendCode}>Resend Code</Link>
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const documentHistorySchema = new mongoose.Schema({
   documentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'AllDocument',
+    ref: 'Document',
     required: true
   },
   date: {

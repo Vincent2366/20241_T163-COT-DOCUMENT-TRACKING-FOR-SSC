@@ -33,6 +33,36 @@ router.get('/documents/all', async (req, res) => {
     }
 });
 
+router.get('/status-counts', async (req, res) => {
+    try {
+      const userOrganization = req.query.organization;
+      
+      if (!userOrganization) {
+        return res.status(400).json({ 
+          error: 'Organization parameter is required'
+        });
+      }
+
+      const pendingCount = await AllDocument.countDocuments({ 
+        recipient: userOrganization,
+        status: 'pending'
+      });
+      
+      const inTransitCount = await AllDocument.countDocuments({ 
+        recipient: userOrganization,
+        status: 'Accept'
+      });
+      
+      res.json({
+        pending: pendingCount,
+        inTransit: inTransitCount
+      });
+    } catch (error) {
+      console.error('Error in status-counts:', error);
+      res.status(500).json({ error: error.message });
+    }
+});
+
 // Route to get all document transfer history with optional filters
 router.get('/history', documentController.getAllDocumentHistory);
 

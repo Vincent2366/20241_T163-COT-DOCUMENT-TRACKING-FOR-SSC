@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './forpass.css'; // Use the same CSS for styling
+import React, { useState, useEffect } from 'react';
+import './forpass.css';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,16 +8,63 @@ const ChangePassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    // Check if we have the reset token
+    const resetToken = sessionStorage.getItem('resetToken');
+    if (!resetToken) {
+      navigate('/forgot-password');
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match!');
-    } else {
-      // Handle the password reset logic here, such as sending the new password to the backend
-      setError('');
-      // After successfully resetting the password, navigate to login page
-      navigate('/');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const resetToken = sessionStorage.getItem('resetToken');
+      console.log('Attempting password reset with token:', resetToken);
+
+      const response = await fetch('http://localhost:2000/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resetToken,
+          newPassword
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      if (response.ok) {
+        sessionStorage.removeItem('resetToken');
+        sessionStorage.removeItem('resetEmail');
+        navigate('/', { 
+          state: { message: 'Password reset successful. Please login with your new password.' }
+        });
+      } else {
+        throw new Error(data.error || 'Failed to reset password');
+      }
+    } catch (err) {
+      console.error('Reset password error:', err);
+      setError(err.message || 'Server error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,7 +101,13 @@ const ChangePassword = () => {
               required 
             />
             <br />
-            <button type="submit" className="sign-in-btn">Change Password</button>
+            <button 
+              type="submit" 
+              className="sign-in-btn" 
+              disabled={loading}
+            >
+              {loading ? 'Resetting Password...' : 'Change Password'}
+            </button>
           </form>
         </div>
       </div>

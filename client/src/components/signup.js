@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './signin.css';
 import logo from '../assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,6 +13,25 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [organizations, setOrganizations] = useState([]);
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const response = await fetch('http://localhost:2000/api/organizations');
+        if (!response.ok) {
+          throw new Error('Failed to fetch organizations');
+        }
+        const data = await response.json();
+        setOrganizations(data);
+      } catch (error) {
+        console.error('Error fetching organizations:', error);
+        setError('Failed to load organizations');
+      }
+    };
+
+    fetchOrganizations();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -71,12 +90,6 @@ const Signup = () => {
     }
   };
 
-  const organizations = [
-    'SBO COT',
-    'SBO EDUC',
-    'SBO CAS'
-  ];
-
   return (
     <div className="signup-container">
       <div className="logo-section">
@@ -105,7 +118,7 @@ const Signup = () => {
             />
             <br />
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-              <div style={{ width: '48%' }}>
+              <div style={{ width: '100%' }}>
                 <label htmlFor="username">User Name</label>
                 <input 
                   id="username" 
@@ -120,25 +133,83 @@ const Signup = () => {
             </div>
             <br />
             <label htmlFor="organization">Select your Organization</label>
-            <select
-              id="organization"
-              value={formData.organization}
-              onChange={handleChange}
-              required
-              style={{
-                width: '105%',
-                padding: '10px',
-                marginBottom: '15px',
-                border: '1px solid #ddd',
-                borderRadius: '15px',
-                fontSize: '16px'
-              }}
-            >
-              <option value="">Select Organization</option>
-              {organizations.map((org, index) => (
-                <option key={index} value={org}>{org}</option>
-              ))}
-            </select>
+            <div className="select-wrapper" style={{
+              position: 'relative',
+              width: '105%',
+              marginBottom: '15px'
+            }}>
+              <select
+                id="organization"
+                value={formData.organization}
+                onChange={handleChange}
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 15px',
+                  appearance: 'none',
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #e1e4e8',
+                  borderRadius: '8px',
+                  fontSize: '15px',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                }}
+              >
+                <option value="">Select Organization</option>
+                <optgroup label="USG/Institutional">
+                  {organizations
+                    .filter(org => org.type === 'USG/Institutional')
+                    .map((org) => (
+                      <option key={org._id} value={org.name}>{org.name}</option>
+                    ))}
+                </optgroup>
+                <optgroup label="Academic Organizations">
+                  {organizations
+                    .filter(org => org.type === 'ACADEMIC')
+                    .map((org) => (
+                      <option key={org._id} value={org.name}>{org.name}</option>
+                    ))}
+                </optgroup>
+                <optgroup label="Civic Organizations">
+                  {organizations
+                    .filter(org => org.type === 'CIVIC')
+                    .map((org) => (
+                      <option key={org._id} value={org.name}>{org.name}</option>
+                    ))}
+                </optgroup>
+                <optgroup label="Religious Organizations">
+                  {organizations
+                    .filter(org => org.type === 'RELIGIOUS')
+                    .map((org) => (
+                      <option key={org._id} value={org.name}>{org.name}</option>
+                    ))}
+                </optgroup>
+                <optgroup label="Fraternity and Sorority">
+                  {organizations
+                    .filter(org => org.type === 'FRATERNITY AND SORORITY')
+                    .map((org) => (
+                      <option key={org._id} value={org.name}>{org.name}</option>
+                    ))}
+                </optgroup>
+              </select>
+              <div style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none',
+                color: '#6c757d'
+              }}>
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                  <path
+                    d="M3.879 4.379L6 6.5l2.121-2.121a.75.75 0 111.06 1.06l-2.829 2.829a.75.75 0 01-1.06 0L2.47 5.439a.75.75 0 011.06-1.06z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </div>
             <br />
             <label htmlFor="password">Enter your Password</label>
             <input 

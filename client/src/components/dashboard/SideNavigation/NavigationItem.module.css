@@ -29,3 +29,18 @@
   .navLabel {
     font-weight: 500;
   }
+  
+  .badge {
+    background-color: #FF4B4B;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+  }

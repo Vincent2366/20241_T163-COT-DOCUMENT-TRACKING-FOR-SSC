@@ -1,11 +1,38 @@
 import styles from './TransactionHistory.module.css';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export function TransactionHistory() {
+  const location = useLocation();
+  const filterType = location.state?.filter;
+
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentHistory, setDocumentHistory] = useState(null);
   const [sortOption, setSortOption] = useState('newest');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [userOrganization, setUserOrganization] = useState(null);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:2000/api/auth/user-details', {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) throw new Error('Failed to fetch user details');
+        const userData = await response.json();
+        setUserOrganization(userData.organization);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
 
   const handleSerialNumberClick = async (id) => {
     try {
@@ -60,12 +87,30 @@ export function TransactionHistory() {
       totalPages: 0
     };
     
-    let filteredData = data.filter(item => 
-      item.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    let filteredData = data;
+    
+    // First filter by organization
+    filteredData = filteredData.filter(item => 
+      userOrganization === 'admin' ? true : item.recipient === userOrganization
     );
     
+    // Then filter by type (Transfer In or Pending)
+    if (filterType === 'Accept') {
+      filteredData = filteredData.filter(item => item.status === 'Accept');
+    } else if (filterType === 'pending') {
+      filteredData = filteredData.filter(item => item.status === 'pending');
+    }
+    
+    // Then apply search filter
+    filteredData = filteredData.filter(item => 
+      item.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.remarks || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    // Apply sorting
     switch (sortOption) {
       case 'newest':
         filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -87,6 +132,33 @@ export function TransactionHistory() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleStatusChange = async (documentId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:2000/api/documents/update-status/${documentId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'Accept' })
+      });
+
+      if (response.ok) {
+        // Update the local state to reflect the change
+        setDocumentData(prevData => 
+          prevData.map(doc => 
+            doc._id === documentId ? { ...doc, status: 'Accept' } : doc
+          )
+        );
+      } else {
+        console.error('Failed to update status');
+      }
+    } catch (error) {
+      console.error('Error updating document status:', error);
+    }
   };
 
   if (loading) {
@@ -137,9 +209,10 @@ export function TransactionHistory() {
           <tr>
             <th>Serial Number</th>
             <th>Document Name</th>
+            <th>Description</th>
+            <th>Remarks</th>
             <th>Recipient</th>
             <th>Date Created</th>
-            <th>Modified</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -156,19 +229,31 @@ export function TransactionHistory() {
                   </button>
                 </td>
                 <td>{transaction.documentName}</td>
+                <td>{transaction.description || '-'}</td>
+                <td>{transaction.remarks || '-'}</td>
                 <td>{transaction.recipient}</td>
                 <td>{formatDate(transaction.createdAt)}</td>
-                <td>{formatDate(transaction.modified)}</td>
                 <td>
-                  <span className={`${styles.status} ${styles[transaction.status.toLowerCase().replace(" ", "")]}`}>
-                    {transaction.status}
-                  </span>
+                  {transaction.status === 'Accept' && (
+                    <button 
+                      className={styles.acceptButton}
+                      onClick={() => handleStatusChange(transaction._id)}
+                      type="button"
+                    >
+                      Accept
+                    </button>
+                  )}
+                  {transaction.status !== 'Accept' && (
+                    <span className={`${styles.status} ${styles[transaction.status.toLowerCase().replace(/\s+/g, "")]}`}>
+                      {transaction.status}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+              <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
                 No documents found
               </td>
             </tr>

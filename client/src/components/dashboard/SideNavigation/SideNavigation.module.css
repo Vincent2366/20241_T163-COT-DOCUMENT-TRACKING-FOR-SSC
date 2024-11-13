@@ -159,4 +159,75 @@
     z-index: 1000; 
 }
 
+.badge {
+  background-color: #FF4B4B;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.select optgroup {
+  font-weight: 600;
+  color: #333;
+}
+
+.select option {
+  padding: 8px;
+  font-weight: normal;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0,102,204,0.2);
+}
+
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4B5563;
+}
+
+.user-info-box {
+  padding: 12px 16px;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+}
+
+.username {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.organization-text {
+  font-size: 13px;
+  color: #6B7280;
+}
+
 

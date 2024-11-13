@@ -9,7 +9,7 @@ export function TransactionHistory() {
 
   const handleSerialNumberClick = async (id) => {
     try {
-      const response = await fetch(`http://localhost:2000/documents/history/${id}`);
+      const response = await fetch(`http://localhost:2000/api/documents/${id}/history`);
       const historyData = await response.json();
       
       setSelectedDocument(id);
