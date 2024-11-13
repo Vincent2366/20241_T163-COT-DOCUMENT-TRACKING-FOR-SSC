@@ -98,11 +98,32 @@ export function ManageOrg() {
     }
   };
 
-  const handleDelete = (orgId) => {
-    // Logic for deleting the organization
-    console.log('Delete organization with ID:', orgId);
-    // You might want to add a confirmation dialog before deletion
+  const handleDelete = async (orgId) => {
+    if (!window.confirm("Are you sure you want to delete this organization?")) {
+      return; // Exit if the user cancels
+    }
+  
+    try {
+      const response = await fetch(`http://localhost:2000/api/organizations/${orgId}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error details:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      setOrgData((prevData) => prevData.filter((org) => org._id !== orgId));
+      console.log('Organization deleted successfully:', orgId);
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+    }
   };
+  
 
   if (loading) {
     return <div>Loading...</div>;
