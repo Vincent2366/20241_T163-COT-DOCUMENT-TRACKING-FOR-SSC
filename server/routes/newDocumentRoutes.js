@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Document = require('../models/Document');
+const DocumentHistory = require('../models/DocumentHistory');
 
 router.post('/', async function(req, res) {
   try {
     const {
       serialNumber,
       documentName,
+      description,
       recipient,
       userId,
-      remarks,
-      status,
-      createdAt
+      remarks
     } = req.body;
 
     // Validate required fields
@@ -22,19 +22,27 @@ router.post('/', async function(req, res) {
       });
     }
 
-    // Create new document with parsed date
+    // Create new document
     const newDocument = new Document({
       serialNumber,
       documentName,
+      description: description || '',
       recipient,
       userId,
-      remarks,
-      status: status || 'pending',
-      createdAt: createdAt ? new Date(createdAt) : new Date(), // Parse the date
-      createdBy: "64f1f3c1e2c1e123456789ab" // Temporary
+      remarks: remarks || '',
+      status: 'Accept',
+      createdAt: new Date()
     });
 
     await newDocument.save();
+
+    // Create history entry
+    const history = new DocumentHistory({
+      documentId: newDocument._id,
+      action: 'Document Created',
+      description: `Document "${documentName}" was created by ${userId}`
+    });
+    await history.save();
 
     res.status(201).json({
       success: true,
@@ -48,23 +56,15 @@ router.post('/', async function(req, res) {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'This Serial Number is already in use. Please use a different Serial Number.',
-        error: error
-      });
-    }
-
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Please fill all required fields',
-        error: error
+        message: 'This Serial Number is already in use.',
+        error: error.message
       });
     }
 
     res.status(500).json({ 
       success: false,
       message: 'An error occurred while creating the document.',
-      error: error
+      error: error.message
     });
   }
 });

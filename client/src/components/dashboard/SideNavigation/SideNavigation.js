@@ -168,45 +168,32 @@ const SideNavigation = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
-
-    const formData = new FormData(e.target);
-    const token = localStorage.getItem('token');
-    const response = await axios.get('/api/auth/me', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    const documentData = {
-      serialNumber: formData.get('serialNumber'),
-      documentName: formData.get('documentName'),
-      recipient: formData.get('recipient'),
-      userId: response.data.username,
-      remarks: formData.get('remarks'),
-      status: 'pending',
-      createdAt: formData.get('createdAt') || new Date().toISOString(),
-    };
-
-    console.log('Sending document data:', documentData);
+    setIsLoading(true);
 
     try {
+      const formData = new FormData(e.target);
+      const documentData = {
+        serialNumber: formData.get('serialNumber'),
+        documentName: formData.get('documentName'),
+        description: formData.get('description'), // Added description
+        recipient: formData.get('recipient'),
+        userId: currentUser?.username, // Use the actual username
+        remarks: formData.get('remarks'),
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
       const response = await axios.post('/api/documents/new', documentData);
-      console.log('Response:', response.data);
-      
-      setSuccessMessage('Document created successfully!');
-      setTimeout(() => {
-        setSuccessMessage('');
-        closeModal();
-      }, 2000);
-      
-      e.target.reset();
-      
-    } catch (err) {
-      console.error('Error response:', err.response?.data);
-      setError(
-        err.response?.data?.message || 
-        'Failed to create document. Please try again.'
-      );
+
+      if (response.data.success) {
+        setSuccessMessage('Document created successfully');
+        setModalOpen(false);
+        // Optionally refresh the document list
+      }
+    } catch (error) {
+      console.error('Error response:', error.response?.data);
+      setError(error.response?.data?.message || 'Failed to create document');
     } finally {
       setIsLoading(false);
     }
@@ -260,6 +247,17 @@ const SideNavigation = () => {
             </div>
             
             <div className={styles.formGroup}>
+              <label className={styles.label}>Description</label>
+              <textarea 
+                name="description"
+                placeholder="Enter document description"
+                className={styles.textarea}
+                rows={2}
+                style={{ minHeight: '60px' }}
+              ></textarea>
+            </div>
+            
+            <div className={styles.formGroup}>
               <label className={styles.label}>Recipient</label>
               <select name="recipient" className={styles.select} required>
                 <option value="">Select Recipient</option>
@@ -301,11 +299,11 @@ const SideNavigation = () => {
               </select>
             </div>
             
-            <div className="form-group">
-              <label className="form-label">User Information</label>
-              <div className="user-info-box">
-                <div className="username">{currentUser?.username}</div>
-                <div className="organization-text">from: {currentUser?.organization}</div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>User Information</label>
+              <div className={styles.userInfoBox}>
+                <div className={styles.username}>{currentUser?.username}</div>
+                <div className={styles.organizationText}>from: {currentUser?.organization}</div>
               </div>
             </div>
             

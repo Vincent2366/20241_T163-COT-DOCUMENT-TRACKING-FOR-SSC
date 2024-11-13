@@ -32,11 +32,12 @@ exports.validateTransfer = async (req, res, next) => {
 
 // Validate document creation
 exports.validateDocumentCreation = (req, res, next) => {
-    const { serialNumber, originOffice, currentLocation } = req.body;
+    const { serialNumber, documentName, recipient, userId } = req.body;
     
-    if (!serialNumber || !originOffice || !currentLocation) {
+    if (!serialNumber || !documentName || !recipient || !userId) {
         return res.status(400).json({ 
-            error: 'Serial number, origin office, and current location are required' 
+            success: false,
+            message: 'Serial number, document name, recipient, and user ID are required' 
         });
     }
     next();

@@ -13,7 +13,7 @@ const documentSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
+        default: '',
     },
     recipient: {
         type: String,
@@ -25,7 +25,7 @@ const documentSchema = new mongoose.Schema({
     },
     remarks: {
         type: String,
-        required: true,
+        default: '',
     }, 
     status: {
         type: String,
@@ -39,7 +39,7 @@ const documentSchema = new mongoose.Schema({
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: false,
     },
 });
 

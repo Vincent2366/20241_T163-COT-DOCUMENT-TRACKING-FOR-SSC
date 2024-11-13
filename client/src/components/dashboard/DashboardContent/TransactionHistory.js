@@ -36,13 +36,17 @@ export function TransactionHistory() {
 
   const handleSerialNumberClick = async (id) => {
     try {
-      const response = await fetch(`http://localhost:2000/documents/history/${id}`);
+      const response = await fetch(`http://localhost:2000/api/documents/history/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch history');
+      }
       const historyData = await response.json();
-      
       setSelectedDocument(id);
       setDocumentHistory(historyData);
     } catch (error) {
       console.error('Error fetching document history:', error);
+      // Optionally show error to user
+      setDocumentHistory([]);
     }
   };
 
@@ -158,6 +162,21 @@ export function TransactionHistory() {
       }
     } catch (error) {
       console.error('Error updating document status:', error);
+    }
+  };
+
+  const formatHistoryDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
     }
   };
 
@@ -288,9 +307,9 @@ export function TransactionHistory() {
             ) : (
               documentHistory.map((entry, index) => (
                 <div key={index} className={styles.historyEntry}>
-                  <h3>{entry.date}</h3>
-                  <p><strong>{entry.action}</strong></p>
-                  <p>{entry.description}</p>
+                  <p className={styles.historyDate}>{formatHistoryDate(entry.date)}</p>
+                  <p className={styles.historyAction}>{entry.action}</p>
+                  <p className={styles.historyDescription}>{entry.description}</p>
                 </div>
               ))
             )}

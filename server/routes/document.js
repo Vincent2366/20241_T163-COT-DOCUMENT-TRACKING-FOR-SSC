@@ -75,4 +75,37 @@ router.get('/recipient-stats', documentController.getRecipientStats);
 // Add this new route
 router.get('/daily-stats', documentController.getDailyStats);
 
+// Add this after your existing routes
+router.get('/history/:id', async (req, res) => {
+  try {
+    const document = await AllDocument.findById(req.params.id);
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    // Create a history entry for the document
+    const history = [
+      {
+        date: document.createdAt,
+        action: 'Document Created',
+        description: `Document "${document.documentName}" was created`
+      }
+    ];
+
+    // Add status change history if status is not pending
+    if (document.status !== 'pending') {
+      history.push({
+        date: document.updatedAt || document.createdAt,
+        action: 'Status Updated',
+        description: `Document status changed to ${document.status}`
+      });
+    }
+
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching document history:', error);
+    res.status(500).json({ message: 'Error retrieving document history' });
+  }
+});
+
 module.exports = router;

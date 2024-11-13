@@ -7,19 +7,23 @@ exports.createDocument = async (req, res) => {
         const { 
             documentName, 
             serialNumber, 
+            description, 
             recipient, 
             currentLocation, 
-            originOffice 
+            originOffice,
+            remarks
         } = req.body;
 
         const newDocument = new Document({
             documentName,
             serialNumber,
+            description,
             recipient,
             currentLocation,
             originOffice,
+            remarks,
             dateCreated: new Date(),
-            status: 'pending' 
+            status: 'Accept' 
         });
 
         await newDocument.save();

@@ -1,7 +1,7 @@
 import styles from './ManageUserUI.module.css';
 import { useState, useEffect } from 'react';
 
-export function ManageUserUI({ users }) {
+export function ManageUserUI({ users, onDeleteUser }) {  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,10 +20,7 @@ export function ManageUserUI({ users }) {
       )
     : users;
 
-  // Calculate total pages
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  // Slice the data for the current page
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
@@ -39,6 +36,32 @@ export function ManageUserUI({ users }) {
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleDelete = async (userID) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) {
+      return; 
+    }
+
+    try {
+      const response = await fetch(`http://localhost:2000/api/users/${userID}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error details:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      onDeleteUser(userID);
+      console.log('User deleted successfully:', userID);
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
   };
 
@@ -69,6 +92,7 @@ export function ManageUserUI({ users }) {
             <th>Organization</th>
             <th>Role</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -79,6 +103,9 @@ export function ManageUserUI({ users }) {
               <td>{user.organization}</td>
               <td>{user.role}</td>
               <td>{user.status}</td>
+              <td>
+                <button onClick={() => handleDelete(user._id)}>Delete</button>
+              </td>
             </tr>
           ))}
         </tbody>
