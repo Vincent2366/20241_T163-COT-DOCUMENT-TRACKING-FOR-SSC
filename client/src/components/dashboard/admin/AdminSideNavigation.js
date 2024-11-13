@@ -33,7 +33,7 @@ const AdminSideNavigation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAddOrgModalOpen, setAddOrgModalOpen] = useState(false);
   const [orgName, setOrgName] = useState('');
-  const [orgId, setOrgId] = useState('');
+  const [orgType, setOrgType] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -58,6 +58,14 @@ const AdminSideNavigation = () => {
     setErrorMessage('');
     setIsLoading(true);
 
+    console.log("orgType value:", orgType);
+
+    if (!orgType) {
+      setErrorMessage('Please select an organization type.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:2000/api/organizations', {
         method: 'POST',
@@ -66,7 +74,7 @@ const AdminSideNavigation = () => {
         },
         body: JSON.stringify({
           name: orgName,
-          organizationId: orgId,
+          type: orgType, 
         }),
       });
 
@@ -74,8 +82,6 @@ const AdminSideNavigation = () => {
         const errorData = await response.json();
         if (errorData.message.includes('duplicate organization name')) {
           throw new Error('Organization name already exists.');
-        } else if (errorData.message.includes('duplicate organization ID')) {
-          throw new Error('Organization ID already exists.');
         } else {
           throw new Error(errorData.message || 'Failed to create organization');
         }
@@ -83,9 +89,9 @@ const AdminSideNavigation = () => {
 
       const data = await response.json();
       console.log('Organization created:', data);
-      
+
       setOrgName('');
-      setOrgId('');
+      setOrgType('');
       setSuccessMessage('Successfully created!');
       setAddOrgModalOpen(false);
 
@@ -122,31 +128,39 @@ const AdminSideNavigation = () => {
           </div>
         ))}
 
-        <Modal isOpen={isAddOrgModalOpen} onClose={() => setAddOrgModalOpen(false)} title="Add New Organization">
-          <form className={styles.modalContent} onSubmit={handleAddOrgSubmit}>
-            <label>
-              Organization:
-              <input 
-                type="text" 
-                placeholder="Enter organization name" 
-                value={orgName} 
-                onChange={(e) => setOrgName(e.target.value)} 
-              />
-            </label>
-            <label>
-              Organization ID:
-              <input 
-                type="text" 
-                placeholder="Enter organization ID" 
-                value={orgId} 
-                onChange={(e) => setOrgId(e.target.value)} 
-              />
-            </label>
-            <button type="submit" className={styles.submitButton} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Add Organization'}
-            </button>
-          </form>
-        </Modal>
+        
+          <Modal isOpen={isAddOrgModalOpen} onClose={() => setAddOrgModalOpen(false)} title="Add New Organization">
+            <form className={styles.modalContent} onSubmit={handleAddOrgSubmit}>
+              <label>
+                Organization:
+                <input 
+                  type="text" 
+                  placeholder="Enter organization name" 
+                  value={orgName} 
+                  onChange={(e) => setOrgName(e.target.value)} 
+                  required 
+                />
+              </label>
+              <label>
+                Organization Type:
+                <select 
+                  value={orgType} 
+                  onChange={(e) => setOrgType(e.target.value)} 
+                  required
+                >
+                  <option value="" disabled>Select type</option>
+                  <option value="USG/Institutional">USG/Institutional</option>
+                  <option value="ACADEMIC">Academic</option>
+                  <option value="CIVIC">Civic</option>
+                  <option value="RELIGIOUS">Religious</option>
+                  <option value="FRATERNITY AND SORORITY">Fraternity and Sorority</option>
+                </select>
+              </label>
+              <button type="submit" className={styles.submitButton} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Add Organization'}
+              </button>
+            </form>
+          </Modal>
       </nav>
     </div>
   );

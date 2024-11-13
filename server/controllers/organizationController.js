@@ -4,7 +4,12 @@ class OrganizationController {
   // Create a new organization
   static async createOrganization(req, res) {
     try {
-      const { name, organizationId } = req.body; // Destructure the request body
+      const { name, organizationId, type } = req.body; // Destructure the request body to include `type`
+
+      // Check if `type` is provided, as it's required
+      if (!type) {
+        return res.status(400).json({ message: 'Organization type is required' });
+      }
 
       // Check for duplicate organization name
       const existingName = await Organization.findOne({ name });
@@ -18,8 +23,10 @@ class OrganizationController {
         return res.status(400).json({ message: 'Duplicate organization ID' });
       }
 
-      const newOrganization = new Organization({ name, organizationId });
+      // Create and save the new organization with `name`, `organizationId`, and `type`
+      const newOrganization = new Organization({ name, organizationId, type });
       await newOrganization.save();
+      
       res.status(201).json(newOrganization);
     } catch (error) {
       if (error.name === 'ValidationError') {
