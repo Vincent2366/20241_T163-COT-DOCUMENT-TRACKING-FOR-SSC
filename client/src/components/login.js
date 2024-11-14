@@ -161,7 +161,6 @@ const Login = () => {
             <button 
               type="submit" 
               className="sign-in-btn"
-              disabled={!isCaptchaVerified}
             >
               Sign in
             </button>

@@ -1,4 +1,3 @@
-
 exports.scheduleReminder = (req, res) => {
     res.send("Scheduled a reminder in Google Calendar");
   };

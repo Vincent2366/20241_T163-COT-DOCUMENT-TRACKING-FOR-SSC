@@ -8,8 +8,8 @@ export function NavigationItem({ icon, label, isActive, status, counts }) {
     switch (status) {
       case 'pending':
         return counts.pending > 0 ? counts.pending : null;
-      case 'in-transit':
-        return counts.inTransit > 0 ? counts.inTransit : null;
+      case 'accept':
+        return counts.accept > 0 ? counts.accept : null;
       default:
         return null;
     }

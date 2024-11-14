@@ -23,6 +23,7 @@ const Signup = () => {
           throw new Error('Failed to fetch organizations');
         }
         const data = await response.json();
+        console.log(data);
         setOrganizations(data);
       } catch (error) {
         console.error('Error fetching organizations:', error);
@@ -46,6 +47,11 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
+      // Validate Organization
+      if (!formData.organization) {
+        setError('Please select a valid organization');
+        return;
+      }
       // Validate email format
       if (!formData.email.endsWith('@student.buksu.edu.ph')) {
         setError('Please use a valid BukSU student email address');
@@ -141,7 +147,7 @@ const Signup = () => {
               <select
                 id="organization"
                 value={formData.organization}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
                 required
                 style={{
                   width: '100%',

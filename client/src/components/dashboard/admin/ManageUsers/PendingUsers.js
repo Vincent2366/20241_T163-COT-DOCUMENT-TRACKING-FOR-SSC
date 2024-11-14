@@ -1,27 +1,76 @@
+import React, { useState, useEffect } from 'react';
 import styles from './ManageUserUI.module.css';
-import { useState, useEffect } from 'react';
 
-export function ManageUserUI({ users, onDeleteUser }) {  
+export default function PendingUsers() {
+  const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; 
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    if (users.length > 0) {
+    fetchPendingUsers();
+  }, []);
+
+  const fetchPendingUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:2000/api/users/all', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const data = await response.json();
+      const pendingUsers = data.filter(user => user.status === 'pending');
+      setPendingUsers(pendingUsers);
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
     }
-  }, [users]);
+  };
 
-  const filteredData = searchTerm 
-    ? users.filter(user => 
+  const handleApprove = async (userId) => {
+    if (!window.confirm("Are you sure you want to approve this user?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:2000/api/users/approve/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Approval result:', result);
+
+      await fetchPendingUsers();
+    } catch (error) {
+      console.error('Error approving user:', error);
+      setError(error.message);
+    }
+  };
+
+  const filteredData = searchTerm
+    ? pendingUsers.filter(user =>
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : users;
+    : pendingUsers;
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -39,41 +88,13 @@ export function ManageUserUI({ users, onDeleteUser }) {
     }
   };
 
-  const handleDelete = async (userID) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) {
-      return; 
-    }
-
-    try {
-      const response = await fetch(`http://localhost:2000/api/users/${userID}`, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error details:', errorData);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      onDeleteUser(userID);
-      console.log('User deleted successfully:', userID);
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className={styles.container}>
       <div className={styles.orgHeader}>
-        <h1 className={styles.orgTitle}>Manage Users</h1>
+        <h1 className={styles.orgTitle}>Pending User Approvals</h1>
         <div className={styles.controls}>
           <input
             type="text"
@@ -84,6 +105,7 @@ export function ManageUserUI({ users, onDeleteUser }) {
           />
         </div>
       </div>
+
       <table className={styles.orgTable}>
         <thead>
           <tr>
@@ -106,10 +128,10 @@ export function ManageUserUI({ users, onDeleteUser }) {
               <td>
                 <div className={styles.actionButtons}>
                   <button 
-                    className={`${styles.actionButton} ${styles.deleteButton}`}
-                    onClick={() => handleDelete(user._id)}
+                    className={`${styles.actionButton}`}
+                    onClick={() => handleApprove(user._id)}
                   >
-                    Delete
+                    Approve
                   </button>
                 </div>
               </td>
@@ -143,11 +165,9 @@ export function ManageUserUI({ users, onDeleteUser }) {
           onClick={handleNextPage} 
           disabled={currentPage === totalPages}
         >
-           &gt;
+          &gt;
         </button>
       </div>
     </div>
   );
 }
-
-export default ManageUserUI;

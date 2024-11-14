@@ -17,6 +17,14 @@ const documentHistorySchema = new mongoose.Schema({
   description: {
     type: String,
     required: true
+  },
+  details: {
+    previousStatus: String,
+    newStatus: String,
+    remarks: String,
+    forwardedFrom: String,
+    description: String,
+    forwardTo: String
   }
 });
 

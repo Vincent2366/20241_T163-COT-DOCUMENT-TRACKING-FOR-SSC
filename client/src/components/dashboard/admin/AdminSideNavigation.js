@@ -10,7 +10,8 @@ const adminNavigationItems = [
     link: "/admin/dashboard" 
   },
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/ef14105a500b66854f89c5620f3d32e2a5dbaf09c38aedabb17f4c76b9ab15f4?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
-    label: "New User Approval" 
+    label: "New User Approval",
+    link: "/admin/pending-users"
   },
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/ef14105a500b66854f89c5620f3d32e2a5dbaf09c38aedabb17f4c76b9ab15f4?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
     label: "Add New Organization", 
@@ -44,9 +45,11 @@ const AdminSideNavigation = () => {
         setAddOrgModalOpen(true);
       } else if (label === "Dashboard") {
         navigate(link);
-      }else if (label === "Manage Organizations") {
+      } else if (label === "Manage Organizations") {
         navigate(link);
       } else if (label === "Manage Users") {
+        navigate(link);
+      } else if (label === "New User Approval") {
         navigate(link);
       }
     }

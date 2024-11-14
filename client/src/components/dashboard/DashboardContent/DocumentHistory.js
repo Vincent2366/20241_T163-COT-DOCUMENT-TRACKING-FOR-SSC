@@ -13,6 +13,8 @@ export function DocumentHistory({ type }) {
   const [sortOption, setSortOption] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [documentsPerPage] = useState(10);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [documentHistory, setDocumentHistory] = useState(null);
 
   useEffect(() => {
     const getUserData = async () => {
@@ -48,7 +50,7 @@ export function DocumentHistory({ type }) {
       if (!userOrg) return;
 
       try {
-        const response = await axios.get('http://localhost:2000/api/documents/documents/all', {
+        const response = await axios.get('http://localhost:2000/api/documents/all', {
           params: {
             organization: userOrg,
             status: type
@@ -129,6 +131,59 @@ export function DocumentHistory({ type }) {
     setCurrentPage(pageNumber);
   };
 
+  const handleSerialNumberClick = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:2000/api/documents/history/${id}`);
+      setSelectedDocument(id);
+      setDocumentHistory(response.data);
+    } catch (error) {
+      console.error('Error fetching document history:', error);
+      setDocumentHistory([]);
+    }
+  };
+
+  const formatHistoryDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  const handleStatusChange = async (documentId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'Accept' ? 'pending' : 'Accept';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`http://localhost:2000/api/documents/update-status/${documentId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          status: newStatus,
+          documentId: documentId,
+          forwardedFrom: userOrg,
+          description: `Status changed from ${currentStatus} to ${newStatus}`,
+          remarks: 'Status update'
+        })
+      });
+
+      // ... rest of the function
+    } catch (error) {
+      console.error('Error updating document status:', error);
+      alert('Failed to update status. Please try again.');
+    }
+  };
+
   return (
     <section className={styles.historySection}>
       <header className={styles.historyHeader}>
@@ -174,7 +229,7 @@ export function DocumentHistory({ type }) {
       <table className={styles.transactionTable}>
         <thead>
           <tr>
-            <th>Serial Numbers</th>
+            <th>Serial Number</th>
             <th>Document Name</th>
             <th>Description</th>
             <th>Remarks</th>
@@ -187,7 +242,14 @@ export function DocumentHistory({ type }) {
           {documents && getSortedData(documents).data.length > 0 ? (
             getSortedData(documents).data.map(doc => (
               <tr key={doc._id}>
-                <td>{doc.serialNumber}</td>
+                <td>
+                  <button 
+                    className={styles.serialNumber} 
+                    onClick={() => handleSerialNumberClick(doc._id)}
+                  >
+                    {doc.serialNumber}
+                  </button>
+                </td>
                 <td>{doc.documentName}</td>
                 <td>{doc.description}</td>
                 <td>{doc.remarks}</td>
@@ -231,6 +293,68 @@ export function DocumentHistory({ type }) {
           &gt; 
         </button>
       </div>
+
+      {selectedDocument && documentHistory && (
+        <div className={styles.popup} onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelectedDocument(null);
+            setDocumentHistory(null);
+          }
+        }}>
+          <div className={styles.popupContent}>
+            <div className={styles.popupHeader}>
+              <h2>Document History</h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => {
+                  setSelectedDocument(null);
+                  setDocumentHistory(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.historyContent}>
+              {documentHistory.map((entry, index) => (
+                <div key={index} className={styles.historyEntry}>
+                  <div className={styles.historyHeader}>
+                    <span className={styles.historyDate}>
+                      {formatHistoryDate(entry.date)}
+                    </span>
+                    <span className={`${styles.historyAction} ${styles[entry.action.toLowerCase().replace(/\s+/g, "")]}`}>
+                      {entry.action}
+                    </span>
+                  </div>
+                  <div className={styles.historyOffice}>
+                    {entry.office}
+                  </div>
+                  <div className={styles.historyActionDetails}>
+                    {entry.details?.forwardedFrom && (
+                      <div className={styles.forwardedFrom}>
+                        Forwarded From: {entry.details.forwardedFrom}
+                      </div>
+                    )}
+                    {entry.details?.description && (
+                      <div>Description: {entry.details.description}</div>
+                    )}
+                    {entry.details?.remarks && (
+                      <div>Remarks: {entry.details.remarks}</div>
+                    )}
+                    {entry.description && !entry.details?.description && (
+                      <div>Actions Taken: {entry.description}</div>
+                    )}
+                  </div>
+                  {entry.details?.forwardTo && (
+                    <div className={styles.historyForward}>
+                      Forwarded to: {entry.details.forwardTo}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 } 

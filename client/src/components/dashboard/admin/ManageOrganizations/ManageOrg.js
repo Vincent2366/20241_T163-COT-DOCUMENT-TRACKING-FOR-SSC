@@ -157,9 +157,18 @@ export function ManageOrg() {
                 <td>{org.name}</td>
                 <td>{org.status}</td>
                 <td>
-                  <button onClick={() => handleEdit(org)}>Edit</button>
-                  <span style={{ margin: '0 8px' }}></span>
-                  <button onClick={() => handleDelete(org._id)}>Delete</button>
+                  <button 
+                    className={styles.actionButton}
+                    onClick={() => handleEdit(org)}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    className={`${styles.actionButton} ${styles.deleteButton}`}
+                    onClick={() => handleDelete(org._id)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))

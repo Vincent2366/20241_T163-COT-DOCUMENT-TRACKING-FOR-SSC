@@ -2,7 +2,18 @@ const express = require('express');
 const router = express.Router();
 const { isAdmin } = require('../middlewares/auth');
 const Organization = require('../models/Organization');
-const User = require('../models/UserLoginModel');
+const User = require('../models/UsersModel');
+
+// Add this route first, before other routes
+router.get('/users/pending', isAdmin, async (req, res) => {
+    try {
+        const pendingUsers = await User.find({ status: 'pending' });
+        res.json(pendingUsers);
+    } catch (error) {
+        console.error('Error fetching pending users:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Register a new student organization (SSC Admin only)
 router.post('/organizations', async (req, res) => {
@@ -38,27 +49,22 @@ router.post('/organizations', async (req, res) => {
 // Approve new organization officer account
 router.put('/users/:userId/approve', isAdmin, async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId);
+        const user = await User.findByIdAndUpdate(
+            req.params.userId,
+            { status: 'active' },
+            { new: true }
+        ).exec();
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Verify if the user belongs to a registered organization
-        const organization = await Organization.findOne({ name: user.organization });
-        if (!organization) {
-            return res.status(400).json({ 
-                error: 'Cannot approve user. Organization not registered.' 
-            });
-        }
-
-        user.status = 'active';
-        await user.save();
-
         res.json({ 
-            message: 'Organization officer account approved successfully', 
+            message: 'User approved successfully',
             user 
         });
     } catch (error) {
+        console.error('Error approving user:', error);
         res.status(500).json({ error: error.message });
     }
 });

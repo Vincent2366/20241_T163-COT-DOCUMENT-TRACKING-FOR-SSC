@@ -10,7 +10,7 @@ axios.defaults.baseURL = 'http://localhost:2000'; // or whatever port your backe
 const navigationItems = [
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/005c7a1fc7b800da9ed0eb7da389c028dba409099cc177f99c94e1fb260ee196?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", label: "Dashboard", isActive: true, link: "/dashboard", view: "documents" },
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/b926edca9da2bd02e758e006f2ebaf4a5943ec2e14c0bc7043ff1638257afb48?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", label: "New Document", view: "transactions" },
-  { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/62af66e9f4c012032bfebdb68e774d2cca1b439bb2c9f816d6066d03b5c1cafc?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", label: "Transfer In", link: "/dashboard/transfer-in", status: "in-transit", view: "transactions" },
+  { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/62af66e9f4c012032bfebdb68e774d2cca1b439bb2c9f816d6066d03b5c1cafc?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", label: "Transfer In", link: "/dashboard/transfer-in", status: "accept", view: "transactions" },
   { icon: "/images/icon.png", label: "Pending", link: "/dashboard/pending", status: "pending", view: "transactions" },
 ];
 
@@ -33,12 +33,7 @@ const documentItems = [
     link: "/dashboard/history/finished",
     view: "documents"
   },
-  { 
-    icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/83feaa9ecdedbf3d72e64b4b4994f571d0ef35f7cef23d1c2e8aae75d542019c", 
-    label: "Transferred Out", 
-    link: "/dashboard/history/transferred",
-    view: "documents"
-  }
+
 ];
 
 const SideNavigation = () => {
@@ -55,7 +50,7 @@ const SideNavigation = () => {
   });
   const [statusCounts, setStatusCounts] = useState({
     pending: 0,
-    inTransit: 0
+    accept: 0
   });
   const [userOrg, setUserOrg] = useState(null);
   const [organizations, setOrganizations] = useState([]);
@@ -108,7 +103,7 @@ const SideNavigation = () => {
         
         setStatusCounts({
           pending: response.data.pending || 0,
-          inTransit: response.data.inTransit || 0
+          accept: response.data.accept || 0
         });
       } catch (error) {
         console.error('Error fetching status counts:', error);
@@ -176,12 +171,14 @@ const SideNavigation = () => {
       const documentData = {
         serialNumber: formData.get('serialNumber'),
         documentName: formData.get('documentName'),
-        description: formData.get('description'), // Added description
+        description: formData.get('description'),
         recipient: formData.get('recipient'),
-        userId: currentUser?.username, // Use the actual username
+        userId: currentUser?.username,
         remarks: formData.get('remarks'),
         status: 'pending',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        currentOffice: currentUser?.organization,
+        originalSender: currentUser?.organization
       };
 
       const response = await axios.post('/api/documents/new', documentData);

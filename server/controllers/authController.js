@@ -1,15 +1,20 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/UserLoginModel'); 
+const Organization = require('../models/Organization');
 // const otpService = require('../services/otpService'); 
 const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
 
 // Registers a new user
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, organization } = req.body;
+    if (!organization) {
+      return res.status(400).json({ error: 'Please select a valid organization' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword, role });
+    const newUser = new User({ name, email, password: hashedPassword, role, organization });
+
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -35,8 +40,8 @@ exports.loginUser = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+    
+    const token = jwt.sign({ id: user._id, role: user.role, organization:user.organization}, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
     res.json({ message: 'Login successful', token });

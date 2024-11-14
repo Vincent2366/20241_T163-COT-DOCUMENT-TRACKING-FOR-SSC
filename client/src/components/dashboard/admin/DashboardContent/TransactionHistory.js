@@ -9,13 +9,14 @@ export function TransactionHistory() {
 
   const handleSerialNumberClick = async (id) => {
     try {
-      const response = await fetch(`http://localhost:2000/api/documents/${id}/history`);
+      const response = await fetch(`http://localhost:2000/api/documents/history/${id}`);
       const historyData = await response.json();
       
       setSelectedDocument(id);
       setDocumentHistory(historyData);
     } catch (error) {
       console.error('Error fetching document history:', error);
+      setDocumentHistory([]);
     }
   };
 
@@ -26,7 +27,7 @@ export function TransactionHistory() {
     const fetchDocument = async () => {
       try {
         console.log('Fetching documents...');
-        const response = await fetch('http://localhost:2000/api/documents/documents/all', {
+        const response = await fetch('http://localhost:2000/api/documents/all', {
           headers: {
             'Accept': 'application/json'
           }
@@ -101,6 +102,21 @@ export function TransactionHistory() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const formatHistoryDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
+    }
   };
 
   if (loading) {
@@ -189,8 +205,7 @@ export function TransactionHistory() {
           )}
         </tbody>
       </table>
-      {/* Popup for document history */}
-      {selectedDocument && (
+      {selectedDocument && documentHistory && (
         <div className={styles.popup} onClick={(e) => {
           if (e.target === e.currentTarget) {
             setSelectedDocument(null);
@@ -199,7 +214,7 @@ export function TransactionHistory() {
         }}>
           <div className={styles.popupContent}>
             <div className={styles.popupHeader}>
-              <h2>Document History for {selectedDocument}</h2>
+              <h2>Document History</h2>
               <button 
                 className={styles.closeButton}
                 onClick={() => {
@@ -210,19 +225,32 @@ export function TransactionHistory() {
                 ×
               </button>
             </div>
-            {!documentHistory ? (
-              <div>Loading history...</div>
-            ) : documentHistory.length === 0 ? (
-              <div>No history available for this document.</div>
-            ) : (
-              documentHistory.map((entry, index) => (
-                <div key={index} className={styles.historyEntry}>
-                  <h3>{entry.date}</h3>
-                  <p><strong>{entry.action}</strong></p>
-                  <p>{entry.description}</p>
+            <div className={styles.timelineContainer}>
+              {documentHistory.map((entry, index) => (
+                <div key={index} className={styles.timelineItem}>
+                  <div className={styles.timelineDot}></div>
+                  <div className={styles.timelineContent}>
+                    <div className={styles.timelineDate}>{formatHistoryDate(entry.date)}</div>
+                    <div className={styles.timelineStatus}>{entry.action}</div>
+                    {entry.details?.actionsTaken && (
+                      <div className={styles.timelineDetail}>
+                        <strong>Actions Taken:</strong> {entry.details.actionsTaken}
+                      </div>
+                    )}
+                    {entry.details?.description && (
+                      <div className={styles.timelineDetail}>
+                        <strong>Description:</strong> {entry.details.description}
+                      </div>
+                    )}
+                    {entry.details?.remarks && (
+                      <div className={styles.timelineDetail}>
+                        <strong>Remarks:</strong> {entry.details.remarks}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
         </div>
       )}

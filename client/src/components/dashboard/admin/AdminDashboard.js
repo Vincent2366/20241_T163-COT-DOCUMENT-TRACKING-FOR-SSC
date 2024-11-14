@@ -20,7 +20,7 @@ const AdminDashboard = () => {
 
     const fetchDocument = async () => {
       try {
-        const response = await fetch('http://localhost:2000/documents/documents/all');
+        const response = await fetch('http://localhost:2000/documents/all');
         const data = await response.json();
         setDocumentData(data);
       } catch (error) {

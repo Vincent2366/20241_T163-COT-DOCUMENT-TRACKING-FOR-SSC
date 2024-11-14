@@ -4,19 +4,26 @@ import styles from './DashboardContent.module.css';
 import { StatisticsSection } from './StatisticsSection';
 import { DocumentHistory } from './DocumentHistory';
 import { TransactionHistory } from './TransactionHistory';
+import { PendingTransactions } from './PendingTransactions';
 
 export function DashboardContent() {
   const location = useLocation();
   const activeView = location.state?.view || 'transactions';
-  const [activeDocumentType, setActiveDocumentType] = useState(null);
+  const filter = location.state?.filter;
 
   return (
     <section className={styles.dashboardContent}>
       <StatisticsSection />
       {activeView === 'transactions' ? (
-        <TransactionHistory type={activeDocumentType} />
+        filter === 'pending' ? (
+          <PendingTransactions />
+        ) : filter === 'Keeping the Document' ? (
+          <TransactionHistory filterStatus="Keeping the Document" />
+        ) : (
+          <TransactionHistory />
+        )
       ) : (
-        <DocumentHistory type={location.state?.filter || null} />
+        <DocumentHistory type={filter || null} />
       )}
     </section>
   );

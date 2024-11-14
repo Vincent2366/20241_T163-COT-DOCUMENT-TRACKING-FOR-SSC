@@ -32,9 +32,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: function() {
             return this.role !== 'admin';
-        },
-        enum: ['SBO COT', 'SBO EDUC', 'SBO CAS'],
-        default: 'SBO'
+        }
     },
     profilePicture: {
         type: String,

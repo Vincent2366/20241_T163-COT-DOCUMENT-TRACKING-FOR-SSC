@@ -78,6 +78,33 @@ class UserController {
       res.status(500).json({ message: 'Error deleting user', error });
     }
   }
+  static async getPendingUsers (req, res) {
+    try {
+      const pendingUsers = await User.find({ status: 'pending' });
+      res.json(pendingUsers);
+    } catch (error) {
+      console.error('Error fetching pending users:', error);
+      res.status(500).json({ message: 'Error fetching pending users' });
+    }
+  }
+  static async approveUser (req, res){
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { status: 'active' },
+        { new: true }
+      );
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error('Error approving user:', error);
+      res.status(500).json({ message: 'Error approving user' });
+    }
+  }
 }
-
+  
 module.exports = UserController;

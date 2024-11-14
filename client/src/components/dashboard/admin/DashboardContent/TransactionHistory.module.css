@@ -61,22 +61,12 @@
   }
   
   .status {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 14px;
     font-weight: 500;
-    width: 100px; /* Set a fixed width */
-    text-align: center; /* Center the text */
-    background-color: #ffb200;
-    color: #fff;
-    border: 1px solid #ff8a00;
+    color: #666;
   }
   
   .pending {
-    background-color: rgba(46, 22, 192, 0.38);
-    color: #00058b;
-    border: 1px solid #0007b0;
+    color: #666;
   }
   
   .inTransit {
@@ -85,16 +75,12 @@
     border: 1px solid #ff8a00;
   }
   
-  .inactive {
-    background-color: #ffc5c5;
-    color: #df0404;
-    border: 1px solid #df0404;
+  .inactive, .deleted {
+    color: #dc3545;
   }
   
   .active {
-    background-color: rgba(76, 175, 80, 0.5);
-    color: #4caf50;
-    border: 1px solid #4caf50;
+    color: #28a745;
   }
   
   @media (max-width: 768px) {
@@ -183,9 +169,9 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -193,27 +179,182 @@
 }
 
 .popupContent {
-  background-color: white;
-  padding: 2rem;
+  background: white;
+  padding: 24px;
   border-radius: 8px;
-  max-width: 600px;
   width: 90%;
+  max-width: 600px;
   max-height: 80vh;
   overflow-y: auto;
 }
+
 .popupHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 24px;
 }
+
+.popupHeader h2 {
+  color: #555;
+  font-size: 22px;
+  font-weight: 500;
+}
+
 .closeButton {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 24px;
   cursor: pointer;
-  padding: 0.5rem;
+  color: #666;
 }
+
+.timelineContainer {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timelineContainer::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #e0e0e0;
+}
+
+.timelineItem {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timelineDot {
+  position: absolute;
+  left: -24px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #4CAF50;
+  border: 2px solid white;
+}
+
+.timelineContent {
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.timelineDate {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.timelineStatus {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.timelineDetail {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.timelineDetail strong {
+  color: #333;
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.historyTable th,
+.historyTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.historyTable th {
+  font-weight: 500;
+  color: #666;
+}
+
+.historyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historyEntry {
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.historyDate {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.historyAction {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.historyOffice {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.historyActionDetails {
+  font-size: 0.95em;
+  color: #444;
+  margin-top: 8px;
+}
+
+.historyForward {
+  margin-top: 8px;
+  color: #0066cc;
+  font-style: italic;
+}
+
+/* Action-specific styles */
+.forwarddocument {
+  color: #0066cc;
+}
+
+.received {
+  color: #28a745;
+}
+
+.rejected {
+  color: #dc3545;
+}
+
+.delivered {
+  color: #28a745;
+}
+
 .serialNumber {
   background: none; /* No background */
   border: none; /* No border */

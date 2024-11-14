@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'c0a60eb64e68204f3c090e3609a203ad7e
 
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password, organization } = req.body;
+        const { username, email, organization, password  } = req.body;
 
         console.log('Organization received:', organization);
 
@@ -30,12 +30,12 @@ router.post('/register', async (req, res) => {
         }
 
         // Validate organization
-        const validOrganizations = ['SBO COT', 'SBO EDUC', 'SBO CAS'];
-        if (!organization || !validOrganizations.includes(organization)) {
-            return res.status(400).json({
-                error: 'Please select a valid organization'
-            });
-        }
+        // const validOrganizations = ['SBO COT', 'SBO EDUC', 'SBO CAS'];
+        // if (!organization || !validOrganizations.includes(organization)) {
+        //     return res.status(400).json({
+        //         error: 'Please select a valid organization'
+        //     });
+        // }
 
         // Check if user already exists
         const existingUser = await User.findOne({

@@ -56,7 +56,7 @@ export function TransactionHistory() {
   useEffect(() => {
     const fetchDocument = async () => {
       try {
-        const response = await fetch('http://localhost:2000/api/documents/documents/all');
+        const response = await fetch('http://localhost:2000/api/documents/all');
         const data = await response.json();
         console.log(data);
         
@@ -138,30 +138,53 @@ export function TransactionHistory() {
     setCurrentPage(pageNumber);
   };
 
-  const handleStatusChange = async (documentId) => {
+  const handleStatusChange = async (documentId, currentStatus) => {
     try {
+      const newStatus = currentStatus === 'Accept' ? 'pending' : 'Accept';
       const token = localStorage.getItem('token');
+      
+      console.log('Sending update request:', {
+        documentId,
+        currentStatus,
+        newStatus,
+        token: token ? 'Token exists' : 'No token'
+      });
+
       const response = await fetch(`http://localhost:2000/api/documents/update-status/${documentId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: 'Accept' })
+        body: JSON.stringify({ 
+          status: newStatus,
+          documentId: documentId // Adding documentId to body as well
+        })
       });
 
-      if (response.ok) {
-        // Update the local state to reflect the change
-        setDocumentData(prevData => 
-          prevData.map(doc => 
-            doc._id === documentId ? { ...doc, status: 'Accept' } : doc
-          )
-        );
-      } else {
-        console.error('Failed to update status');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('Server response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        throw new Error(`Server returned ${response.status}: ${errorData?.message || response.statusText}`);
       }
+
+      const data = await response.json();
+      console.log('Update successful:', data);
+
+      // Update the local state to reflect the change
+      setDocumentData(prevData => 
+        prevData.map(doc => 
+          doc._id === documentId ? { ...doc, status: newStatus } : doc
+        )
+      );
     } catch (error) {
       console.error('Error updating document status:', error);
+      // Optionally show error to user using a toast or alert
+      alert('Failed to update status. Please try again.');
     }
   };
 
@@ -253,20 +276,13 @@ export function TransactionHistory() {
                 <td>{transaction.recipient}</td>
                 <td>{formatDate(transaction.createdAt)}</td>
                 <td>
-                  {transaction.status === 'Accept' && (
-                    <button 
-                      className={styles.acceptButton}
-                      onClick={() => handleStatusChange(transaction._id)}
-                      type="button"
-                    >
-                      Accept
-                    </button>
-                  )}
-                  {transaction.status !== 'Accept' && (
-                    <span className={`${styles.status} ${styles[transaction.status.toLowerCase().replace(/\s+/g, "")]}`}>
-                      {transaction.status}
-                    </span>
-                  )}
+                  <button 
+                    className={transaction.status === 'Accept' ? styles.acceptButton : styles.pendingButton}
+                    onClick={() => handleStatusChange(transaction._id, transaction.status)}
+                    type="button"
+                  >
+                    {transaction.status}
+                  </button>
                 </td>
               </tr>
             ))

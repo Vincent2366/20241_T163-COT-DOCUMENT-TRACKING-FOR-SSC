@@ -208,9 +208,21 @@ async function seedDocuments() {
         documents.forEach(doc => {
             doc.userId = "user123";
             doc.createdBy = "64f1f3c1e2c1e123456789ab";
-            // Convert status to match enum values
-            if (doc.status === 'In Progress') doc.status = 'in-transit';
-            if (doc.status === 'Under Review' || doc.status === 'Pending') doc.status = 'pending';
+            doc.currentOffice = doc.recipient;
+            doc.originalSender = "Supreme Student Council";
+            
+            // Convert status values to match enum
+            switch (doc.status.toLowerCase()) {
+                case 'in-transit':
+                    doc.status = 'pending';
+                    break;
+                case 'delivered':
+                    doc.status = 'Accept';
+                    break;
+                case 'pending':
+                    doc.status = 'pending';
+                    break;
+            }
         });
 
         // Insert new documents
