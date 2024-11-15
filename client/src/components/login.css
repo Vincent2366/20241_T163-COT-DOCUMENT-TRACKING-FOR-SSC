@@ -18,6 +18,10 @@ body {
 }
 
 /* Left section for the logo */
+.logo {
+    width: 300px;
+    height: auto;
+}
 .logo-section {
     flex: 0 0 50%; /* Set a fixed width of 50% */
     display: flex;
@@ -26,16 +30,18 @@ body {
     align-items: center;
 }
 
-.logo-section .logo {
-    width: 150px;
+/* .logo-section .logo {
+    width: 300px;
     height: auto;
     margin-bottom: 20px;
-}
+} */
 
-.logo-section h1 {
-    color: white;
-    font-size: 36px;
-    font-family: Arial, sans-serif;
+.logo-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 50%;
 }
 
 /* Right section for the form */

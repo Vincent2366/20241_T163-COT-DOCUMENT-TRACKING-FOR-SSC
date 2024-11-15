@@ -181,7 +181,7 @@ documentHandler.historyID = async (req, res) =>{
           {
             date: document.createdAt,
             action: 'Document Created',
-            description: `Document "${document.documentName}" was created`,
+           // description: `Document "${document.documentName}" was created`,
             actionsTaken: `Document "${document.documentName}" was created`,
             details: {
               documentName: document.documentName,

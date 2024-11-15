@@ -71,8 +71,8 @@ const ChangePassword = () => {
   return (
     <div className="login-container2">
       <div className="logo-section">
-        <img src={logo} alt="Logo" className="logo" />
-        <h1><span style={{ color: 'blue' }}>DOCU TRACK</span></h1>
+        <img src={logo} alt="Logo" className="logo" style={{ width: '450px', height: 'auto' }}/>
+        <h1><span style={{ color: 'blue' }}></span></h1>
       </div>
       <div className="form-section">
         <div className="form-content2">
