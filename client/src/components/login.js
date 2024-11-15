@@ -24,21 +24,46 @@ const Login = () => {
     });
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const decoded = jwtDecode(credentialResponse.credential);
-      console.log("Decoded Google User:", decoded);
-      
-      if (!decoded.email.endsWith('@student.buksu.edu.ph')) {
-        alert('Access is restricted to @student.buksu.edu.ph email addresses only.');
-        return; 
-      }
-      recaptchaRef.current.reset();
-      setIsCaptchaVerified(false);
-      navigate('/dashboard');
+        const response = await fetch('http://localhost:2000/api/auth/google-login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                credential: credentialResponse.credential
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Login failed');
+        }
+
+        // Store token and user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Reset reCAPTCHA
+        recaptchaRef.current.reset();
+        setIsCaptchaVerified(false);
+
+        // Route based on role and status
+        if (data.user.role === 'admin') {
+            navigate('/admin/dashboard');
+        } else if (data.user.role === 'officer' && data.user.status === 'active') {
+            navigate('/dashboard');
+        } else if (data.user.status === 'pending') {
+            setError('Your account is pending approval');
+        }
+
     } catch (error) {
-      console.error("Google login error:", error);
-      setError('Login failed. Please try again.');
+        console.error("Google login error:", error);
+        setError(error.message || 'Login failed. Please try again.');
+        recaptchaRef.current.reset();
+        setIsCaptchaVerified(false);
     }
   };
 

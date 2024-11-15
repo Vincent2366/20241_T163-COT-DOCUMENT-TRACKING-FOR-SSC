@@ -300,7 +300,7 @@ export function PendingTransactions() {
             <th>Document Name</th>
             <th>Description</th>
             <th>Remarks</th>
-            <th>Recipient</th>
+            <th>Sender</th>
             <th>Date Created</th>
             <th>Action</th>
           </tr>
@@ -313,7 +313,7 @@ export function PendingTransactions() {
                 <td>{doc.documentName}</td>
                 <td>{doc.description || '-'}</td>
                 <td>{doc.remarks || '-'}</td>
-                <td>{doc.recipient}</td>
+                <td>{doc.originalSender || '-'}</td>
                 <td>{formatDate(doc.createdAt)}</td>
                 <td>
                   <div className={styles.statusDropdownContainer}>

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "google-auth-library": "^9.14.2",
     "nodemailer": "^6.9.16"
   }
 }

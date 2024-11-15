@@ -16,17 +16,26 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         validate: {
             validator: function(email) {
-                // Skip validation for admin emails
                 if (this.role === 'admin') return true;
                 return email.endsWith('@student.buksu.edu.ph');
             },
             message: 'Please use a valid BukSU student email'
         }
-    }, 
+    },
+    googleId: {
+        type: String,
+        sparse: true,
+        unique: true
+    },
     password: {
         type: String,
-        required: true,
-        minlength: [6, 'Password must be at least 6 characters long']
+        default: '',
+        validate: {
+            validator: function(password) {
+                return !this.googleId || password.length >= 6 || password === '';
+            },
+            message: 'Password must be at least 6 characters long'
+        }
     },
     organization: {
         type: String,

@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const authController = require('../controllers/authController');
 const { sendVerificationCode } = require('../services/emailService');
 const VerificationCode = require('../models/VerificationCode');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client('948616457649-9m9i5mjm96aq76cgbk96t1rk0guo137k.apps.googleusercontent.com');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'c0a60eb64e68204f3c090e3609a203ad7eed4281c5508066391eb024de0b1b72a9c5d5ce6155a7f641fcb36b35cd65979dab085d039883d1ffacf77cac68e79a';
 
@@ -28,14 +30,6 @@ router.post('/register', async (req, res) => {
                 error: 'Please use a valid BukSU student email address'
             });
         }
-
-        // Validate organization
-        // const validOrganizations = ['SBO COT', 'SBO EDUC', 'SBO CAS'];
-        // if (!organization || !validOrganizations.includes(organization)) {
-        //     return res.status(400).json({
-        //         error: 'Please select a valid organization'
-        //     });
-        // }
 
         // Check if user already exists
         const existingUser = await User.findOne({
@@ -336,6 +330,71 @@ router.post('/resend-code', async (req, res) => {
     console.error('Resend code error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// Add this new route
+router.post('/google-login', async (req, res) => {
+    try {
+        const { credential } = req.body;
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+        
+        const payload = ticket.getPayload();
+        const googleId = payload.sub;
+
+        if (!payload.email.endsWith('@student.buksu.edu.ph')) {
+            return res.status(403).json({ error: 'Please use a BukSU student email' });
+        }
+
+        let user = await User.findOne({ 
+            $or: [
+                { googleId: googleId },
+                { email: payload.email }
+            ]
+        });
+        
+        if (!user) {
+            user = new User({
+                username: payload.email.split('@')[0],
+                email: payload.email,
+                googleId: googleId,
+                password: '', // Empty password for Google users
+                organization: 'Pending',
+                role: 'officer',
+                status: 'pending'
+            });
+            await user.save();
+        } else if (!user.googleId) {
+            user.googleId = googleId;
+            await user.save();
+        }
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, status: user.status },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                status: user.status,
+                organization: user.organization,
+                hasPassword: !!user.password
+            }
+        });
+
+    } catch (error) {
+        console.error('Google login error:', error);
+        res.status(500).json({ error: 'Authentication failed' });
+    }
 });
 
 module.exports = router;

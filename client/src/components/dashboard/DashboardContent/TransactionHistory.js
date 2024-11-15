@@ -108,7 +108,7 @@ export function TransactionHistory() {
     // Then apply search filter
     filteredData = filteredData.filter(item => 
       item.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.originalSender.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.remarks || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -143,13 +143,6 @@ export function TransactionHistory() {
       const newStatus = currentStatus === 'Accept' ? 'pending' : 'Accept';
       const token = localStorage.getItem('token');
       
-      console.log('Sending update request:', {
-        documentId,
-        currentStatus,
-        newStatus,
-        token: token ? 'Token exists' : 'No token'
-      });
-
       const response = await fetch(`http://localhost:2000/api/documents/update-status/${documentId}`, {
         method: 'PUT',
         headers: {
@@ -158,22 +151,13 @@ export function TransactionHistory() {
         },
         body: JSON.stringify({ 
           status: newStatus,
-          documentId: documentId // Adding documentId to body as well
+          documentId: documentId
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error('Server response:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
-        });
-        throw new Error(`Server returned ${response.status}: ${errorData?.message || response.statusText}`);
+        throw new Error(`Server returned ${response.status}`);
       }
-
-      const data = await response.json();
-      console.log('Update successful:', data);
 
       // Update the local state to reflect the change
       setDocumentData(prevData => 
@@ -183,7 +167,6 @@ export function TransactionHistory() {
       );
     } catch (error) {
       console.error('Error updating document status:', error);
-      // Optionally show error to user using a toast or alert
       alert('Failed to update status. Please try again.');
     }
   };
@@ -210,7 +193,7 @@ export function TransactionHistory() {
   return (
     <section className={styles.historySection}>
       <header className={styles.historyHeader}>
-        <h1 className={styles.historyTitle}>Transactions</h1>
+        <h1 className={styles.historyTitle}>Transfer In</h1>
         <div className={styles.controls}>
           <div className={styles.searchWrapper}>
             <img 
@@ -253,8 +236,8 @@ export function TransactionHistory() {
             <th>Document Name</th>
             <th>Description</th>
             <th>Remarks</th>
-            <th>Recipient</th>
-            <th>Date Created</th>
+            <th>Sender</th>
+            <th>Date</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -273,13 +256,13 @@ export function TransactionHistory() {
                 <td>{transaction.documentName}</td>
                 <td>{transaction.description || '-'}</td>
                 <td>{transaction.remarks || '-'}</td>
-                <td>{transaction.recipient}</td>
+                <td>{transaction.originalSender || '-'}</td>
                 <td>{formatDate(transaction.createdAt)}</td>
                 <td>
                   <button 
                     className={transaction.status === 'Accept' ? styles.acceptButton : styles.pendingButton}
-                    onClick={() => handleStatusChange(transaction._id, transaction.status)}
                     type="button"
+                    onClick={() => handleStatusChange(transaction._id, transaction.status)}
                   >
                     {transaction.status}
                   </button>
