@@ -61,13 +61,13 @@ documentHandler.newDocument = async(req, res)=>{
     
         await newDocument.save();
     
-        // Create history entry
-        const history = new DocumentHistory({
-          documentId: newDocument._id,
-          action: 'Document Created',
-          description: `Document "${documentName}" was created by ${userId}`
-        });
-        await history.save();
+        // // Create history entry
+        // const history = new DocumentHistory({
+        //   documentId: newDocument._id,
+        //   //action: 'Document Created',
+        //   //description: `Document "${documentName}" was created by ${userId}`
+        // });
+        // await history.save();
     
         res.status(201).json({
           success: true,
@@ -181,7 +181,7 @@ documentHandler.historyID = async (req, res) =>{
           {
             date: document.createdAt,
             action: 'Document Created',
-           // description: `Document "${document.documentName}" was created`,
+            description: `Document "${document.documentName}" was created`,
             actionsTaken: `Document "${document.documentName}" was created`,
             details: {
               documentName: document.documentName,

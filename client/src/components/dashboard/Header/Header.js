@@ -186,8 +186,8 @@ export function Header() {
         <div className={styles.calendarContainer}>
           {/* Placeholder for Google Calendar integration */}
           <iframe
-            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=YOUR_TIMEZONE"
-            style={{ border: 0, width: '100%', height: '600px' }}
+            src="https://calendar.google.com/calendar/embed?src=primary_ID&ctz=Asia/Manila&hl=en"
+            style={{ border: 0, width: '100%', height: '400px' }}
             frameBorder="0"
             scrolling="no"
             title="Google Calendar"
