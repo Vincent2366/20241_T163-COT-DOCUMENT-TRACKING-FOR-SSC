@@ -116,7 +116,7 @@ export function ManageUserUI({ users, onDeleteUser }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table>   
 
       {/* Pagination Controls */}
       <div className={styles.pagination}>
