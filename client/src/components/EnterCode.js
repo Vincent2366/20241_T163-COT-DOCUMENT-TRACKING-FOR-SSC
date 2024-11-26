@@ -81,7 +81,7 @@ const EnterCode = () => {
   return (
     <div className="login-container2">
       <div className="logo-section">
-        <img src={logo} alt="Logo" className="logo" style={{ width: '450px', height: 'auto' }}/>
+        <img src={logo} alt="Logo" className="logo" style={{ width: '450px', height: 'auto', paddingBottom: '100px' }}/>
         <h1><span style={{ color: 'blue' }}></span></h1>
       </div>
       <div className="form-section">
