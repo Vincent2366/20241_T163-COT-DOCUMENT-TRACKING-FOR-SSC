@@ -31,3 +31,5 @@ package-lock.json
 /config/
 *.json
 .env
+
+uploads/
