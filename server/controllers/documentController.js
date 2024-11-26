@@ -57,6 +57,26 @@ exports.getDocument = async (req, res) => {
     }
 };
 
+// Get documents by organization
+exports.getDocumentsByOrganization = async (req, res) => {
+    try {
+        const orgName = req.params.orgName;
+        
+        // Find documents where the organization is either sender or recipient
+        const documents = await Document.find({
+            $or: [
+                { originalSender: orgName },
+                { recipient: orgName }
+            ]
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json(documents);
+    } catch (error) {
+        console.error('Error fetching documents by organization:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Transfer document to new location
 exports.transferDocument = async (req, res) => {
     const { newLocation } = req.body;

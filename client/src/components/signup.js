@@ -74,8 +74,8 @@ const Signup = () => {
           username: formData.username,
           password: formData.password,
           organization: formData.organization,
-          role: 'officer', // Add default role
-          status: 'pending' // Add default status
+          role: 'officer', 
+          status: 'pending' 
         }),
       });
 

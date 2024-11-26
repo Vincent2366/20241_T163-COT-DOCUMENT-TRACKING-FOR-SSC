@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './PieChart.module.css';
 
 export const PieChart = () => {
   const [dataState, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,11 +29,10 @@ export const PieChart = () => {
   useEffect(() => {
     if (dataState.length === 0) return;
 
-    const canvas = document.getElementById('pieChart');
+    const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Clear the canvas first
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         let startAngle = 0;
@@ -59,7 +59,7 @@ export const PieChart = () => {
       <h2 className={styles.chartTitle}>Document Distribution by Recipient</h2>
       <div className={styles.pieChartWrapper}>
         <canvas 
-          id="pieChart" 
+          ref={canvasRef}
           width="170" 
           height="170"
           role="img"
@@ -72,10 +72,9 @@ export const PieChart = () => {
             <div 
               className={styles.legendDot}
               style={{ backgroundColor: item.color }}
-              role="presentation"
             />
             <span className={styles.legendLabel}>{item.name}</span>
-            <span className={styles.legendValue}>{item.value}</span>
+            <span className={styles.legendValue}>({item.value})</span>
           </div>
         ))}
       </div>

@@ -58,6 +58,30 @@ export function DocumentHistory({ type }) {
         });
         let filteredDocs = response.data.filter(doc => doc.recipient === userOrg);
 
+        // Check for new documents and send email notifications
+        const newDocuments = filteredDocs.filter(doc => 
+          doc.status === 'in-transit' && 
+          !doc.notificationSent // You'll need to add this field to your document schema
+        );
+
+        if (newDocuments.length > 0) {
+          try {
+            await axios.post('http://localhost:2000/api/notifications/email', {
+              documents: newDocuments,
+              organization: userOrg
+            });
+
+            // Mark documents as notified
+            await Promise.all(newDocuments.map(doc => 
+              axios.patch(`http://localhost:2000/api/documents/${doc._id}`, {
+                notificationSent: true
+              })
+            ));
+          } catch (error) {
+            console.error('Error sending email notifications:', error);
+          }
+        }
+
         // Filter based on type parameter
         switch (type) {
           case 'in-transit':
@@ -233,7 +257,7 @@ export function DocumentHistory({ type }) {
             <th>Document Name</th>
             <th>Description</th>
             <th>Remarks</th>
-            <th>Recipient</th>
+            <th>Sender</th>
             <th>Date Created</th>
             <th>Status</th>
           </tr>
@@ -253,7 +277,7 @@ export function DocumentHistory({ type }) {
                 <td>{doc.documentName}</td>
                 <td>{doc.description}</td>
                 <td>{doc.remarks}</td>
-                <td>{doc.recipient}</td>
+                <td>{doc.originalSender || '-'}</td>
                 <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
                 <td>{doc.status}</td>
               </tr>

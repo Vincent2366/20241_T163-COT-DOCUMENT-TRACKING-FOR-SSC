@@ -24,10 +24,21 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'default-profile.png',
     },
+    profilePictureId: {
+        type: String,
+        default: null
+    },
+    driveFileLink: {
+        type: String,
+        default: null
+    },
     role: {
         type: String,
         enum: ['officer', 'admin'],
         default: 'officer',
+    },
+    documentHistory:{
+        type: Array
     },
     status: {
         type: String,
@@ -42,5 +53,12 @@ userSchema.pre('save', async function(next) {
     }
     next();
 });
+
+userSchema.methods.updateProfilePicture = async function(driveFileId, driveFileLink) {
+    this.profilePictureId = driveFileId;
+    this.profilePicture = driveFileLink;
+    this.driveFileLink = driveFileLink;
+    return this.save();
+};
 
 module.exports = mongoose.model('Users', userSchema); 

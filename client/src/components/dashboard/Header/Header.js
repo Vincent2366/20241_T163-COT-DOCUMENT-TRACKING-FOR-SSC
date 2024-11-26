@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gapi } from 'gapi-script';
 import { useNavigate } from 'react-router-dom';
+import { FaRegCalendarAlt } from 'react-icons/fa';
 import styles from './Header.module.css';
+import axios from 'axios';
 
 const CLIENT_ID = '465216288473-9t6vhd30arvjfjtogqinvbtj9a6vnmjc.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyCAq7zCrb2WvN03qb52D0FHsPfY3OEzO-o';
@@ -12,8 +14,8 @@ export function Header() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
   const navigate = useNavigate();
   const profileMenuRef = useRef(null);
   const notificationRef = useRef(null);
@@ -26,7 +28,6 @@ export function Header() {
         discoveryDocs: DISCOVERY_DOCS,
         scope: SCOPES,
       });
-      setIsAuthenticated(true);
     }
     gapi.load('client:auth2', start);
   }, []);
@@ -54,27 +55,20 @@ export function Header() {
     };
   }, []);
 
-  const handleAuthClick = async () => {
-    try {
-      console.log("Attempting to sign in...");
-      await gapi.auth2.getAuthInstance().signIn();
-      console.log("User signed in successfully");
-      // Proceed with fetching calendar data
-    } catch (error) {
-      console.error("Error during sign-in:", error);
-    }
-  };
-
-  const handleSignoutClick = () => {
-    gapi.auth2.getAuthInstance().signOut();
-  };
-
   const toggleProfileMenu = () => {
     setShowProfileMenu(!showProfileMenu);
   };
 
   const handleProfileClick = () => {
-    navigate('/dashboard/profile');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user?.role === 'admin') {
+      navigate('/admin/profile');
+    } else {
+      navigate('/dashboard', { 
+        state: { view: 'profile' },
+        replace: true
+      });
+    }
     setShowProfileMenu(false);
   };
 
@@ -117,6 +111,25 @@ export function Header() {
     };
   }, []);
 
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:2000/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setProfilePicture(response.data.profilePicture);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
   return (
     <header className={styles.headerContainer}>
       <div className={styles.logoSection}>
@@ -126,39 +139,9 @@ export function Header() {
       <div className={styles.userSection}>
         <nav className={styles.headerNav}>
           <div className={styles.calendarIconContainer} onClick={toggleCalendar}>
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/1eaec27ef17cb768bc36b6df35592458c456fe90ea0a0b8123d7cff5a8423a8a?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a"
-              alt="Calendar Icon"
+          <FaRegCalendarAlt 
+              className={styles.calendarIcon}
             />
-          </div>
-          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/804b63a8ef2260387a5f1c1092038331b625470de795379c107be68e67034a35?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" alt="Settings Icon" className={styles.settingsIcon} />
-          <div className={styles.notificationIconContainer} ref={notificationRef}>
-            <svg
-              className={styles.notificationIcon}
-              onClick={toggleNotifications}
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            {showNotifications && (
-              <div className={styles.notificationDropdown}>
-                <h3>Notifications</h3>
-                <ul>
-                  <li>New message from John Doe</li>
-                  <li>Your report is ready</li>
-                  <li>Meeting scheduled for tomorrow</li>
-                </ul>
-              </div>
-            )}
           </div>
         </nav>
         <div className={styles.userInfo}>
@@ -169,10 +152,14 @@ export function Header() {
         </div>
         <div className={styles.profileMenuContainer} ref={profileMenuRef}>
           <img 
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/40de4afe7756242bae0b94bb31dd4d0e506fdfca0602fd790cfcf481e417d257?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" 
+            src={profilePicture || "https://cdn.builder.io/api/v1/image/assets/TEMP/40de4afe7756242bae0b94bb31dd4d0e506fdfca0602fd790cfcf481e417d257?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a"} 
             alt="User Avatar" 
             className={styles.userAvatar}
             onClick={toggleProfileMenu}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://cdn.builder.io/api/v1/image/assets/TEMP/40de4afe7756242bae0b94bb31dd4d0e506fdfca0602fd790cfcf481e417d257?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a";
+            }}
           />
           {showProfileMenu && (
             <div className={styles.profileMenu}>
@@ -186,8 +173,8 @@ export function Header() {
         <div className={styles.calendarContainer}>
           {/* Placeholder for Google Calendar integration */}
           <iframe
-            src="https://calendar.google.com/calendar/embed?src=primary_ID&ctz=Asia/Manila&hl=en"
-            style={{ border: 0, width: '100%', height: '400px' }}
+            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=YOUR_TIMEZONE"
+            style={{ border: 0, width: '100%', height: '600px' }}
             frameBorder="0"
             scrolling="no"
             title="Google Calendar"

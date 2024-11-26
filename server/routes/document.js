@@ -16,5 +16,7 @@ router.get('/:id/history', validateDocumentId, documentController.getDocumentHis
 router.get('/history/:id', documentHandler.historyID);
 router.put('/update-status/:id', documentHandler.updateStatus);
 router.put('/forward/:id', documentHandler.forward);
+router.get('/organization/:orgName', documentController.getDocumentsByOrganization);
+
 
 module.exports = router;

@@ -166,7 +166,7 @@
 
 /* Optional: Add a custom arrow */
 .sortWrapper::after {
-  content: '▼'; /* Custom arrow */
+  content: ''; /* Custom arrow */
   position: absolute;
   right: 10px; /* Positioning */
   top: 50%; /* Center vertically */
@@ -678,6 +678,12 @@
   padding: 15px;
 }
 
+.historyContainer {
+  overflow-y: auto; 
+  max-height: calc(80vh - 100px); 
+  padding-right: 10px; 
+}
+
 .historyEntry {
   position: relative;
   border-left: 2px solid #ccc;
@@ -766,4 +772,72 @@
 
 .historyActionDetails > div:last-child {
   margin-bottom: 0;
+}
+
+.serialNumberButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #666666;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: inherit;
+  font-weight: bold;
+}
+
+.serialNumberButton:hover {
+  color: #004499;
+}
+
+.transactionsContainer {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transactionTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.transactionTable th,
+.transactionTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.transactionTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.noData {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* Status styles */
+.pending {
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.accept {
+  background: #d4edda;
+  color: #155724;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.finished {
+  background: #cce5ff;
+  color: #004085;
+  padding: 4px 8px;
+  border-radius: 4px;
 }

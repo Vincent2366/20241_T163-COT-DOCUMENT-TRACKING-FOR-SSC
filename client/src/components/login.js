@@ -140,7 +140,7 @@ const Login = () => {
           
           {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
-          <GoogleOAuthProvider clientId="948616457649-9m9i5mjm96aq76cgbk96t1rk0guo137k.apps.googleusercontent.com">
+          <GoogleOAuthProvider clientId="814983617624-cr4q91nie6v91k83kv9io9stvabte2oo.apps.googleusercontent.com">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => {

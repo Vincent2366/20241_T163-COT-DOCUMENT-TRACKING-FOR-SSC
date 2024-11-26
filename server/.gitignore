@@ -27,3 +27,7 @@ node_modules/
 package-lock.json
 
 
+# Credentials and config
+/config/
+*.json
+.env

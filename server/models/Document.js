@@ -29,7 +29,7 @@ const documentSchema = new mongoose.Schema({
     }, 
     status: {
         type: String,
-        enum: ['pending', 'Keeping the Document', 'delivered', 'rejected', 'Accept'],
+        enum: ['Pending', 'Keeping the Document', 'delivered', 'rejected', 'Accept', 'accept', 'pending'],
         default: 'Accept',
     },
     createdAt: {
@@ -50,6 +50,7 @@ const documentSchema = new mongoose.Schema({
     originalSender: { type: String, required: true }, // Store the original sender's office
     currentOffice: { type: String, required: true },  // Current location of document
     previousOffices: [String], // Array of offices that have handled the document
+    notificationSent: { type: Boolean, default: false }, // Flag to track if notification has been sent 
 });
 
 // Only create index for serialNumber

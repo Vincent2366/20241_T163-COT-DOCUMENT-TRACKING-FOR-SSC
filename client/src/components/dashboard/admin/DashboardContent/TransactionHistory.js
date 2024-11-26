@@ -167,9 +167,11 @@ export function TransactionHistory() {
           <tr>
             <th>Serial Number</th>
             <th>Document Name</th>
-            <th>Recipient</th>
+            <th>Description</th>
+            <th>Original Sender</th>
+            <th>Current Office</th>
             <th>Date Created</th>
-            <th>Modified</th>
+            <th>Remarks</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -186,9 +188,11 @@ export function TransactionHistory() {
                   </button>
                 </td>
                 <td>{transaction.documentName}</td>
-                <td>{transaction.recipient}</td>
+                <td>{transaction.description || '-'}</td>
+                <td>{transaction.originalSender || '-'}</td>
+                <td>{transaction.recipient || '-'}</td>
                 <td>{formatDate(transaction.createdAt)}</td>
-                <td>{formatDate(transaction.modified)}</td>
+                <td>{transaction.remarks || '-'}</td>
                 <td>
                   <span className={`${styles.status} ${styles[transaction.status.toLowerCase().replace(" ", "")]}`}>
                     {transaction.status}
@@ -198,7 +202,7 @@ export function TransactionHistory() {
             ))
           ) : (
             <tr>
-              <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+              <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
                 No documents found
               </td>
             </tr>

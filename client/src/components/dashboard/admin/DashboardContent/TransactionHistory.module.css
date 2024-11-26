@@ -156,7 +156,7 @@
 
 /* Optional: Add a custom arrow */
 .sortWrapper::after {
-  content: '▼'; /* Custom arrow */
+  content: ''; /* Custom arrow */
   position: absolute;
   right: 10px; /* Positioning */
   top: 50%; /* Center vertically */

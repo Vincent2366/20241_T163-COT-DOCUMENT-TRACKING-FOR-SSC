@@ -2,6 +2,7 @@ const documentHandler = {};
 
 const Document = require('../models/Document');
 const DocumentHistory = require('../models/DocumentHistory');
+const notificationHandler = require('./notificationHandler');
 
 
 
@@ -60,14 +61,17 @@ documentHandler.newDocument = async(req, res)=>{
         });
     
         await newDocument.save();
+        
+        // Send notification after document is created
+        await notificationHandler.sendDocumentNotification(newDocument);
     
-        // // Create history entry
-        // const history = new DocumentHistory({
-        //   documentId: newDocument._id,
-        //   //action: 'Document Created',
-        //   //description: `Document "${documentName}" was created by ${userId}`
-        // });
-        // await history.save();
+        // Create history entry
+        const history = new DocumentHistory({
+          documentId: newDocument._id,
+          action: 'Document Created',
+          description: `Document "${documentName}" was created by ${userId}`
+        });
+        await history.save();
     
         res.status(201).json({
           success: true,
@@ -165,52 +169,75 @@ documentHandler.statusCount = async (req, res) =>{
       }
 }
 
-documentHandler.historyID = async (req, res) =>{
+documentHandler.historyID = async (req, res) => {
     try {
         const document = await Document.findById(req.params.id);
         if (!document) {
-          return res.status(404).json({ message: 'Document not found' });
+            return res.status(404).json({ message: 'Document not found' });
         }
-    
+
         // Get all history entries from DocumentHistory collection
-        const historyEntries = await DocumentHistory.find({ documentId: req.params.id })
-          .sort({ date: -1 });
-    
+        const historyEntries = await DocumentHistory.find({ documentId: req.params.id });
+
         // Create initial history array with document creation
         const history = [
-          {
-            date: document.createdAt,
-            action: 'Document Created',
-            description: `Document "${document.documentName}" was created`,
-            actionsTaken: `Document "${document.documentName}" was created`,
-            details: {
-              documentName: document.documentName,
-              serialNumber: document.serialNumber,
-              description: document.description || '',
-              remarks: document.remarks || ''
-            }
-          },
-          ...historyEntries.map(entry => ({
-            date: entry.date,
-            action: entry.action,
-            description: entry.description,
-            actionsTaken: entry.details?.remarks 
-              ? `${entry.description} - Remarks: ${entry.details.remarks}`
-              : entry.description,
-            details: {
-              ...entry.details,
-              description: entry.description,
-              remarks: entry.details?.remarks || ''
-            }
-          }))
+            {
+                date: document.createdAt,
+                action: 'Document Created',
+                office: document.originalSender,
+                description: `Document "${document.documentName}" was created`,
+                details: {
+                    documentName: document.documentName,
+                    serialNumber: document.serialNumber,
+                    description: document.description || '',
+                    remarks: document.remarks || ''
+                }
+            },
+            ...historyEntries.map(entry => {
+                let formattedEntry = {
+                    date: entry.date || entry.createdAt,
+                    action: entry.action,
+                    office: entry.details?.forwardedFrom || document.currentOffice,
+                    description: entry.details?.description || entry.description
+                };
+
+                // Add specific details based on action type
+                switch (entry.action) {
+                    case 'Forward Document':
+                        formattedEntry.details = {
+                            forwardedFrom: entry.details?.forwardedFrom,
+                            forwardTo: entry.details?.forwardTo,
+                            documentCopy: entry.details?.documentCopy,
+                            routePurpose: entry.details?.routePurpose,
+                            remarks: entry.details?.remarks
+                        };
+                        break;
+                    case 'Status Updated':
+                        formattedEntry.details = {
+                            previousStatus: entry.details?.previousStatus,
+                            newStatus: entry.details?.newStatus,
+                            remarks: entry.details?.remarks
+                        };
+                        break;
+                    default:
+                        formattedEntry.details = entry.details || {};
+                }
+
+                return formattedEntry;
+            })
         ];
-    
-        res.json(history);
-      } catch (error) {
+
+        // Sort by date in descending order (newest first)
+        const sortedHistory = history.sort((a, b) => {
+            return new Date(b.date) - new Date(a.date);
+        });
+
+        res.json(sortedHistory);
+    } catch (error) {
         console.error('Error fetching document history:', error);
         res.status(500).json({ message: 'Error retrieving document history' });
-      }
-}
+    }
+};
 
 documentHandler.updateStatus = async(req, res)=>{
     try {
@@ -254,56 +281,89 @@ documentHandler.updateStatus = async(req, res)=>{
       }
 }
 
-documentHandler.forward = async(req, res)=>{
+documentHandler.forward = async(req, res) => {
     try {
-        const { status, forwardTo, remarks, documentCopy, routePurpose, forwardedBy, forwardedAt } = req.body;
+        const { forwardTo, remarks, documentCopy, routePurpose, forwardedBy } = req.body;
         
-        // First get the current document to preserve the current recipient
+        // Get current document
         const currentDocument = await Document.findById(req.params.id);
         if (!currentDocument) {
-          return res.status(404).json({ error: 'Document not found' });
+            return res.status(404).json({ error: 'Document not found' });
         }
-    
-        const forwardedFrom = currentDocument.recipient; // Store the current recipient as forwardedFrom
+
+        const forwardedFrom = currentDocument.recipient;
+
+        // Prevent forwarding to the same organization
+        if (forwardTo === forwardedFrom) {
+            return res.status(400).json({ 
+                error: 'Cannot forward document to the same organization' 
+            });
+        }
         
-        // Update document status and details
-        const document = await Document.findByIdAndUpdate(
-          req.params.id,
-          {
-            status,
-            recipient: forwardTo,
-            remarks,
-            documentCopy,
-            routePurpose,
-            updatedAt: new Date()
-          },
-          { new: true }
+        // Update document with initial 'Accept' status for the receiving organization
+        const updatedDocument = await Document.findByIdAndUpdate(
+            req.params.id,
+            {
+                status: 'Accept', // Changed from 'pending' to 'Accept'
+                recipient: forwardTo,
+                currentOffice: forwardTo,
+                previousOffices: currentDocument.previousOffices?.length > 0 
+                    ? [...new Set([...currentDocument.previousOffices, forwardedFrom])]
+                    : [forwardedFrom],
+                remarks,
+                documentCopy,
+                routePurpose,
+                updatedAt: new Date(),
+                forwardHistory: [
+                    ...(currentDocument.forwardHistory || []),
+                    {
+                        from: forwardedFrom,
+                        to: forwardTo,
+                        date: new Date(),
+                        remarks,
+                        documentCopy,
+                        routePurpose,
+                        status: 'Accept' // Changed this as well
+                    }
+                ]
+            },
+            { new: true }
         );
-    
-        // Create history entry for forwarding
+
+        // Send notification to new recipient
+        await notificationHandler.sendDocumentNotification(updatedDocument);
+
+        // Create history entry
+        const historyDescription = `Document forwarded from ${forwardedFrom} to ${forwardTo}`;
         const history = new DocumentHistory({
-          documentId: document._id,
-          action: 'Forward Document',
-          description: `Document forwarded from ${forwardedFrom} to ${forwardTo}`,
-          details: {
-            forwardedFrom, // Add the previous recipient
-            forwardedBy,
-            forwardTo,
-            remarks,
-            documentCopy,
-            routePurpose,
-            description: `Document forwarded from ${forwardedFrom} to ${forwardTo}` // Add description
-          },
-          date: forwardedAt
+            documentId: updatedDocument._id,
+            action: 'Forward Document',
+            description: historyDescription,
+            date: new Date(),
+            details: {
+                forwardedFrom,
+                forwardTo,
+                documentCopy,
+                routePurpose,
+                remarks,
+                description: historyDescription,
+                status: 'Accept' // Added status to history
+            }
         });
+        
         await history.save();
-    
-        res.json(document);
-      } catch (error) {
+        
+        console.log('Document forwarded successfully:', updatedDocument);
+        res.json(updatedDocument);
+        
+    } catch (error) {
         console.error('Error forwarding document:', error);
-        res.status(500).json({ error: 'Failed to forward document' });
-      }
-}
+        res.status(500).json({ 
+            error: 'Failed to forward document',
+            details: error.message 
+        });
+    }
+};
 
 
 

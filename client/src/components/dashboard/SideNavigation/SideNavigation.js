@@ -18,8 +18,7 @@ const documentItems = [
   { 
     icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/5eb33c88da331cbd7c80d172ba8a5de6d7debd99be7fac7149b15af2863f8670", 
     label: "All", 
-    link: "/dashboard/history",
-    view: "documents"
+    view: "transactions"
   },
   { 
     icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/299f0b10ae60643f7737cf49c147dcc13c34aad7e5b16295767fbcbfae42acd2", 
@@ -134,13 +133,25 @@ const SideNavigation = () => {
   }, []);
 
   const handleItemClick = (label, link, view) => {
-    if (link) {
+    
+    if (label === "New Document") {
+      setModalTitle("New Document");
+      setModalContent("new-document");
+      setModalOpen(true);
+    } else if (label === "All") { 
+      console.log('Clicking all'); 
+      navigate('/dashboard', { 
+        state: { 
+          filter: 'all', 
+          view: 'transactions', 
+          organization: currentUser?.organization 
+        } 
+      });
+    } else if (link) {
       if (label === "Transfer In") {
         navigate('/dashboard', { state: { filter: 'Accept', view } });
       } else if (label === "Pending") {
         navigate('/dashboard', { state: { filter: 'pending', view } });
-      } else if (label === "All") {
-        navigate('/dashboard', { state: { filter: 'all', view } });
       } else if (label === "In Transit") {
         navigate('/dashboard', { state: { filter: 'in-transit', view } });
       } else if (label === "Finished") {
@@ -150,10 +161,6 @@ const SideNavigation = () => {
       } else {
         navigate(link, { state: { view } });
       }
-    } else if (label === "New Document") {
-      setModalTitle("New Document");
-      setModalContent("new-document");
-      setModalOpen(true);
     }
   };
 

@@ -12,8 +12,15 @@ export function TransactionHistory() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [userOrganization, setUserOrganization] = useState(null);
+  const [documentData, setDocumentData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
+  console.log('current filterType', filterType);
   useEffect(() => {
+
+    
     const fetchUserDetails = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -50,15 +57,22 @@ export function TransactionHistory() {
     }
   };
 
-  const [documentData, setDocumentData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     const fetchDocument = async () => {
       try {
-        const response = await fetch('http://localhost:2000/api/documents/all');
+        let url = 'http://localhost:2000/api/documents/all';
+        
+        // If filter type is 'all' and we have userOrganization, use the organization endpoint
+        if (filterType === 'all' && userOrganization) {
+          const encodedOrg = encodeURIComponent(userOrganization);
+          url = `http://localhost:2000/api/documents/organization/${encodedOrg}`;
+        }
+  
+        const response = await fetch(url);
         const data = await response.json();
-        console.log(data);
+        console.log('Fetched documents:', data);
         
         setDocumentData(data);
       } catch (error) {
@@ -67,12 +81,13 @@ export function TransactionHistory() {
         setLoading(false);
       }
     };
+  
+    if (userOrganization) {
+      fetchDocument();
+    }
+  }, [filterType, userOrganization]);
 
-    fetchDocument();
-  }, []);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+ 
 
   const formatDate = (dateString) => {
     try {
@@ -93,16 +108,23 @@ export function TransactionHistory() {
     
     let filteredData = data;
     
-    // First filter by organization
-    filteredData = filteredData.filter(item => 
-      userOrganization === 'admin' ? true : item.recipient === userOrganization
-    );
-    
-    // Then filter by type (Transfer In or Pending)
+    // Filter based on the type of view
     if (filterType === 'Accept') {
-      filteredData = filteredData.filter(item => item.status === 'Accept');
+      // Show only accepted documents where user is recipient
+      filteredData = filteredData.filter(item => 
+        item.status === 'Accept' && item.recipient === userOrganization
+      );
     } else if (filterType === 'pending') {
-      filteredData = filteredData.filter(item => item.status === 'pending');
+      // Show only pending documents where user is recipient
+      filteredData = filteredData.filter(item => 
+        item.status === 'pending' && item.recipient === userOrganization
+      );
+    } else if (filterType === 'all') {
+      // Show all documents where the organization is either sender or recipient
+      filteredData = filteredData.filter(item => 
+        item.originalSender === userOrganization || 
+        item.recipient === userOrganization
+      );
     }
     
     // Then apply search filter
@@ -186,6 +208,19 @@ export function TransactionHistory() {
     }
   };
 
+  const getHeaderTitle = () => {
+    switch (filterType) {
+      case 'Accept':
+        return 'Transfer In';
+      case 'pending':
+        return 'Pending';
+      case 'all':
+        return `Transactions`;
+      default:
+        return 'Transfer In';
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -193,7 +228,7 @@ export function TransactionHistory() {
   return (
     <section className={styles.historySection}>
       <header className={styles.historyHeader}>
-        <h1 className={styles.historyTitle}>Transfer In</h1>
+        <h1 className={styles.historyTitle}>{getHeaderTitle()}</h1>
         <div className={styles.controls}>
           <div className={styles.searchWrapper}>
             <img 
