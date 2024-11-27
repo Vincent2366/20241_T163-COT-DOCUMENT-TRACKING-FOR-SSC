@@ -1,0 +1,29 @@
+.exportButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.3s;
+}
+
+.exportButton:hover {
+    opacity: 0.8;
+}
+
+.exportButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.sheetsIcon {
+    width: 25px;  /* Adjust size as needed */
+    height: 30px;
+}
+
+.loadingText {
+    font-size: 8px;
+    color: #666;
+} 

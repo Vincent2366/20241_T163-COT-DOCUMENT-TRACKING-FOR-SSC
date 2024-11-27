@@ -7,7 +7,7 @@ class GoogleDriveService {
     this.GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
     
     const auth = new google.auth.GoogleAuth({
-      keyFile: path.join(__dirname, '../config/doctracking-441710-dab36748c1dc.json'),
+      keyFile: path.join(__dirname, '../config/googleDrive.json'),
       scopes: ['https://www.googleapis.com/auth/drive']
     });
 

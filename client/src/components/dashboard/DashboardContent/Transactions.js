@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './Transactions.module.css';
 import { useLocation } from 'react-router-dom';
+import ExportButton from '../Reports/ExportButton';
 
 const Transactions = ({ organization }) => {
+    console.log('Organization ID:', organization);
     const location = useLocation();
     const filterType = location.state?.filter;
 
@@ -16,6 +18,7 @@ const Transactions = ({ organization }) => {
     const [sortOption, setSortOption] = useState('newest');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -164,7 +167,9 @@ const Transactions = ({ organization }) => {
   return (
     <section className={styles.historySection}>
     <header className={styles.historyHeader}>
-        <h1 className={styles.historyTitle}>{getHeaderTitle()}</h1>
+        <div className={styles.headerTop}>
+            <h1 className={styles.historyTitle}>{getHeaderTitle()}</h1>
+        </div>
         <div className={styles.controls}>
         <div className={styles.searchWrapper}>
             <img 
@@ -210,7 +215,10 @@ const Transactions = ({ organization }) => {
             <th>Recipient</th>
             <th>Created At</th>
             <th>Current Office</th>
-          </tr>
+            <th className={styles.exportButton}>
+            <ExportButton organizationId={organization} />
+        </th>
+        </tr>
         </thead>
         <tbody>
           {getFilteredData(documents).data.length > 0 ? (
