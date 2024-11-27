@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import ExportButton from '../Reports/ExportButton';
 
 const Transactions = ({ organization }) => {
-    console.log('Organization ID:', organization);
     const location = useLocation();
     const filterType = location.state?.filter;
 
@@ -24,13 +23,20 @@ const Transactions = ({ organization }) => {
     const fetchDocuments = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`/api/documents/organization/${organization}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        console.log('Organization value:', organization);
+        
+        const response = await axios.get(`/api/documents/organization/${organization}/all-transactions`, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
+        
         setDocuments(response.data);
       } catch (err) {
-        setError('Failed to fetch documents');
-        console.error('Error fetching documents:', err);
+        console.error('Full error object:', err);
+        console.error('Error response:', err.response?.data);
+        setError(err.response?.data?.message || err.message || 'Failed to fetch documents');
       } finally {
         setIsLoading(false);
       }
