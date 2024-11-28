@@ -165,6 +165,7 @@ export function TransactionHistory() {
       const newStatus = currentStatus === 'Accept' ? 'pending' : 'Accept';
       const token = localStorage.getItem('token');
       
+      // Update status
       const response = await fetch(`http://localhost:2000/api/documents/update-status/${documentId}`, {
         method: 'PUT',
         headers: {
@@ -181,14 +182,45 @@ export function TransactionHistory() {
         throw new Error(`Server returned ${response.status}`);
       }
 
-      // Update the local state to reflect the change
+      // If changing from Accept to pending, send notification to sender
+      if (currentStatus === 'Accept' && newStatus === 'pending') {
+        const document = documentData.find(doc => doc._id === documentId);
+        if (document) {
+          console.log('Sending acceptance notification for document:', document);
+          
+          const notificationResponse = await fetch('http://localhost:2000/api/notifications/acceptance-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              documents: [document]
+            })
+          });
+
+          if (!notificationResponse.ok) {
+            const errorData = await notificationResponse.json();
+            console.error('Failed to send acceptance notification:', {
+              status: notificationResponse.status,
+              error: errorData
+            });
+          } else {
+            console.log('Acceptance notification sent successfully');
+          }
+        } else {
+          console.error('Document not found in documentData:', documentId);
+        }
+      }
+
+      // Update the local state
       setDocumentData(prevData => 
         prevData.map(doc => 
           doc._id === documentId ? { ...doc, status: newStatus } : doc
         )
       );
     } catch (error) {
-      console.error('Error updating document status:', error);
+      console.error('Error in handleStatusChange:', error);
       alert('Failed to update status. Please try again.');
     }
   };

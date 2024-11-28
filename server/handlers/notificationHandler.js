@@ -1,4 +1,4 @@
-const { sendDocumentNotification } = require('../services/emailService');
+const { sendDocumentNotification, sendAcceptanceNotification } = require('../services/emailService');
 const Organization = require('../models/Organization');
 const User = require('../models/UsersModel');
 
@@ -10,70 +10,101 @@ const notificationHandler = {
         return false;
       }
 
-      // Log the incoming document data
-      console.log('Document data:', {
-        recipient: document.recipient,
-        documentName: document.documentName,
-        status: document.status
-      });
-      
-      // First try to find the organization
-      const organization = await Organization.findOne({
+      // Find recipient organization (SSC)
+      const recipientOrg = await Organization.findOne({
         name: { $regex: new RegExp(`^${document.recipient}$`, 'i') }
       });
 
-      if (!organization) {
-        console.error('Organization not found for:', document.recipient);
+      if (!recipientOrg) {
+        console.error('Recipient organization not found:', document.recipient);
         return false;
       }
-      console.log('Found organization:', organization.name, 'with ID:', organization._id);
 
-      // Find all officers for this organization
+      // Find recipient officers
       const officers = await User.find({
-        organization: organization.name,
+        organization: recipientOrg.name,
         role: 'officer'
-      }).select('name email role');
+      }).select('email');
 
       if (!officers || officers.length === 0) {
-        console.error('No officers found for organization:', organization.name);
+        console.error('No officers found for organization:', recipientOrg.name);
         return false;
       }
 
-      console.log(`Found ${officers.length} officers for organization:`, organization.name);
-
-      // Send notifications to all officers
+      // Send notifications to all recipient officers
       let successCount = 0;
       for (const officer of officers) {
-        if (!officer.email) {
-          console.warn(`Officer ${officer.name} has no email address`);
-          continue;
-        }
+        if (!officer.email) continue;
 
-        console.log('Attempting to send email notification to:', officer.email);
         const success = await sendDocumentNotification(
           officer.email,
           [document],
-          organization.name
+          recipientOrg.name
+        );
+
+        if (success) successCount++;
+      }
+
+      return successCount > 0;
+    } catch (error) {
+      console.error('Error in document notification:', error);
+      return false;
+    }
+  },
+
+  sendAcceptanceNotification: async (document) => {
+    try {
+      if (!document || !document.originalSender) {
+        console.error('Invalid document data:', document);
+        return false;
+      }
+
+      // Find sender organization
+      const senderOrg = await Organization.findOne({
+        name: { $regex: new RegExp(`^${document.originalSender}$`, 'i') }
+      });
+
+      if (!senderOrg) {
+        console.error('Sender organization not found:', document.originalSender);
+        return false;
+      }
+
+      // Find only the officers from the sender organization
+      const senderOfficers = await User.find({
+        organization: document.originalSender,  // Use exact organization name
+        role: 'officer'
+      }).select('email');
+
+      if (!senderOfficers || senderOfficers.length === 0) {
+        console.error('No officers found for sender organization:', document.originalSender);
+        return false;
+      }
+
+      console.log('Found sender officers:', senderOfficers.map(o => o.email));
+
+      // Send notifications only to sender organization officers
+      let successCount = 0;
+      for (const officer of senderOfficers) {
+        if (!officer.email) continue;
+
+        console.log('Sending acceptance notification to sender:', officer.email);
+        const success = await sendAcceptanceNotification(
+          officer.email,
+          [document],
+          document.recipient // accepting organization
         );
 
         if (success) {
           successCount++;
-          console.log('Email notification sent successfully to:', officer.email);
+          console.log('Acceptance notification sent successfully to:', officer.email);
         } else {
-          console.error('Failed to send email notification to:', officer.email);
+          console.error('Failed to send acceptance notification to:', officer.email);
         }
       }
 
-      // Return true if at least one notification was sent successfully
       return successCount > 0;
-
     } catch (error) {
-      console.error('Error in notification process:', {
-        message: error.message,
-        stack: error.stack,
-        document: document?.recipient,
-        errorName: error.name
-      });
+      console.error('Error in acceptance notification:', error);
       return false;
     }
   }
