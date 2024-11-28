@@ -300,4 +300,13 @@
   cursor: not-allowed;
 }
 
+:global(.ant-select) {
+  width: 100%;
+}
+
+:global(.ant-select-selector) {
+  border-radius: 4px;
+  min-height: 35px;
+}
+
 

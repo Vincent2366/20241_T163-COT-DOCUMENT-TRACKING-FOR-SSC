@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import styles from './SideNavigation.module.css';
 import { NavigationItem } from './NavigationItem';
-import Modal from '../../Modal'; // Adjust the path as necessary
+import Modal from '../../Modal'; 
 import axios from 'axios';
+import { Select, Checkbox } from 'antd'; 
 
-axios.defaults.baseURL = 'http://localhost:2000'; // or whatever port your backend is running on
+axios.defaults.baseURL = 'http://localhost:2000'; 
 
 const navigationItems = [
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/005c7a1fc7b800da9ed0eb7da389c028dba409099cc177f99c94e1fb260ee196?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", label: "Dashboard", isActive: true, link: "/dashboard", view: "documents" },
@@ -54,6 +55,7 @@ const SideNavigation = () => {
   const [userOrg, setUserOrg] = useState(null);
   const [organizations, setOrganizations] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedRecipients, setSelectedRecipients] = useState([]);
 
   useEffect(() => {
     // Get user data when component mounts
@@ -173,13 +175,19 @@ const SideNavigation = () => {
     setError(null);
     setIsLoading(true);
 
+    // Validate recipients
+    if (selectedRecipients.length === 0) {
+      setError('Please select at least one recipient');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const formData = new FormData(e.target);
-      const documentData = {
-        serialNumber: formData.get('serialNumber'),
+      const baseSerialNumber = formData.get('serialNumber');
+      const baseDocumentData = {
         documentName: formData.get('documentName'),
         description: formData.get('description'),
-        recipient: formData.get('recipient'),
         userId: currentUser?.username,
         remarks: formData.get('remarks'),
         status: 'pending',
@@ -188,19 +196,61 @@ const SideNavigation = () => {
         originalSender: currentUser?.organization
       };
 
-      const response = await axios.post('/api/documents/new', documentData);
+      let successCount = 0;
+      let failCount = 0;
 
-      if (response.data.success) {
-        setSuccessMessage('Document created successfully');
-        setModalOpen(false);
-        // Optionally refresh the document list
+      // Process each recipient sequentially
+      for (let i = 0; i < selectedRecipients.length; i++) {
+        const recipient = selectedRecipients[i];
+        try {
+          console.log('Submitting document for recipient:', recipient);
+          
+          // Create unique serial number for each recipient
+          const serialSuffix = selectedRecipients.length > 1 ? `-${i + 1}` : '';
+          const serialNumber = `${baseSerialNumber}${serialSuffix}`;
+          
+          const response = await axios.post('/api/documents/new', {
+            ...baseDocumentData,
+            serialNumber,
+            recipient: recipient.trim()
+          });
+          
+          if (response.data.success) {
+            successCount++;
+          }
+        } catch (error) {
+          console.error('Failed to create document for:', recipient, error);
+          failCount++;
+        }
       }
+
+      if (successCount > 0) {
+        setSuccessMessage(`Successfully created ${successCount} document(s)`);
+        if (failCount === 0) {
+          setModalOpen(false);
+          e.target.reset();
+          setSelectedRecipients([]);
+        }
+      }
+
+      if (failCount > 0) {
+        setError(`Failed to create ${failCount} document(s)`);
+      }
+
     } catch (error) {
       console.error('Error response:', error.response?.data);
       setError(error.response?.data?.message || 'Failed to create document');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getAllOrganizationNames = () => {
+    return organizations.map(org => org.name);
+  };
+
+  const handleSelectAll = (checked) => {
+    setSelectedRecipients(checked ? getAllOrganizationNames() : []);
   };
 
   return (
@@ -262,45 +312,65 @@ const SideNavigation = () => {
             </div>
             
             <div className={styles.formGroup}>
-              <label className={styles.label}>Recipient</label>
-              <select name="recipient" className={styles.select} required>
-                <option value="">Select Recipient</option>
-                <optgroup label="USG/Institutional">
+              <label className={styles.label}>Recipients</label>
+              <Select
+                mode="multiple"
+                style={{ width: '100%' }}
+                placeholder="Select Recipients"
+                onChange={setSelectedRecipients}
+                value={selectedRecipients}
+                dropdownRender={menu => (
+                  <div>
+                    <div style={{ padding: '8px' }}>
+                      <Checkbox
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        checked={selectedRecipients.length === organizations.length}
+                        indeterminate={selectedRecipients.length > 0 && selectedRecipients.length < organizations.length}
+                      >
+                        Select All
+                      </Checkbox>
+                    </div>
+                    <div style={{ borderBottom: '1px solid #e8e8e8' }} />
+                    {menu}
+                  </div>
+                )}
+              >
+                <Select.OptGroup label="USG/Institutional">
                   {organizations
                     .filter(org => org.type === 'USG/Institutional')
                     .map((org) => (
-                      <option key={org._id} value={org.name}>{org.name}</option>
+                      <Select.Option key={org._id} value={org.name}>{org.name}</Select.Option>
                     ))}
-                </optgroup>
-                <optgroup label="Academic Organizations">
+                </Select.OptGroup>
+                <Select.OptGroup label="Academic Organizations">
                   {organizations
                     .filter(org => org.type === 'ACADEMIC')
                     .map((org) => (
-                      <option key={org._id} value={org.name}>{org.name}</option>
+                      <Select.Option key={org._id} value={org.name}>{org.name}</Select.Option>
                     ))}
-                </optgroup>
-                <optgroup label="Civic Organizations">
+                </Select.OptGroup>
+                <Select.OptGroup label="Civic Organizations">
                   {organizations
                     .filter(org => org.type === 'CIVIC')
                     .map((org) => (
-                      <option key={org._id} value={org.name}>{org.name}</option>
+                      <Select.Option key={org._id} value={org.name}>{org.name}</Select.Option>
                     ))}
-                </optgroup>
-                <optgroup label="Religious Organizations">
+                </Select.OptGroup>
+                <Select.OptGroup label="Religious Organizations">
                   {organizations
                     .filter(org => org.type === 'RELIGIOUS')
                     .map((org) => (
-                      <option key={org._id} value={org.name}>{org.name}</option>
+                      <Select.Option key={org._id} value={org.name}>{org.name}</Select.Option>
                     ))}
-                </optgroup>
-                <optgroup label="Fraternity and Sorority">
+                </Select.OptGroup>
+                <Select.OptGroup label="Fraternity and Sorority">
                   {organizations
                     .filter(org => org.type === 'FRATERNITY AND SORORITY')
                     .map((org) => (
-                      <option key={org._id} value={org.name}>{org.name}</option>
+                      <Select.Option key={org._id} value={org.name}>{org.name}</Select.Option>
                     ))}
-                </optgroup>
-              </select>
+                </Select.OptGroup>
+              </Select>
             </div>
             
             <div className={styles.formGroup}>
