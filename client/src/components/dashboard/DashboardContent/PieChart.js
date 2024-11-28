@@ -13,7 +13,32 @@ export const PieChart = () => {
         const response = await fetch('http://localhost:2000/api/documents/recipient-stats');
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
-        setData(data);
+        
+        // Process data to combine counts for each unique organization
+        const orgCounts = new Map();
+        
+        data.forEach(item => {
+          // Split combined recipients and process each one
+          const recipients = item.name.split(', ');
+          const countPerOrg = item.value / recipients.length; // Distribute count evenly
+          
+          recipients.forEach(org => {
+            const trimmedOrg = org.trim();
+            orgCounts.set(
+              trimmedOrg, 
+              (orgCounts.get(trimmedOrg) || 0) + countPerOrg
+            );
+          });
+        });
+
+        // Convert back to array format
+        const processedData = Array.from(orgCounts.entries()).map(([name, value]) => ({
+          name,
+          value: Math.round(value), // Round to whole number
+          color: getColorForOrg(name) // You'll need to implement this function
+        }));
+
+        setData(processedData);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -23,6 +48,28 @@ export const PieChart = () => {
 
     fetchData();
   }, []);
+
+  // Add this function to maintain consistent colors for organizations
+  const getColorForOrg = (orgName) => {
+    // You can define a color mapping or use a hash function
+    const colors = [
+      '#1890ff', // blue
+      '#52c41a', // green
+      '#722ed1', // purple
+      '#fa8c16', // orange
+      '#eb2f96', // pink
+      '#faad14', // yellow
+      '#13c2c2', // cyan
+      '#f5222d', // red
+    ];
+    
+    // Use a simple hash function to consistently map organizations to colors
+    const hash = orgName.split('').reduce((acc, char) => {
+      return char.charCodeAt(0) + ((acc << 5) - acc);
+    }, 0);
+    
+    return colors[Math.abs(hash) % colors.length];
+  };
 
   const total = dataState.reduce((acc, item) => acc + item.value, 0);
 
