@@ -166,35 +166,35 @@ const Signup = () => {
                 <option value="">Select Organization</option>
                 <optgroup label="USG/Institutional">
                   {organizations
-                    .filter(org => org.type === 'USG/Institutional')
+                    .filter(org => org.type === 'USG/Institutional' && org.status === 'Active')
                     .map((org) => (
                       <option key={org._id} value={org.name}>{org.name}</option>
                     ))}
                 </optgroup>
                 <optgroup label="Academic Organizations">
                   {organizations
-                    .filter(org => org.type === 'ACADEMIC')
+                    .filter(org => org.type === 'ACADEMIC' && org.status === 'Active')
                     .map((org) => (
                       <option key={org._id} value={org.name}>{org.name}</option>
                     ))}
                 </optgroup>
                 <optgroup label="Civic Organizations">
                   {organizations
-                    .filter(org => org.type === 'CIVIC')
+                    .filter(org => org.type === 'CIVIC' && org.status === 'Active')
                     .map((org) => (
                       <option key={org._id} value={org.name}>{org.name}</option>
                     ))}
                 </optgroup>
                 <optgroup label="Religious Organizations">
                   {organizations
-                    .filter(org => org.type === 'RELIGIOUS')
+                    .filter(org => org.type === 'RELIGIOUS' && org.status === 'Active')
                     .map((org) => (
                       <option key={org._id} value={org.name}>{org.name}</option>
                     ))}
                 </optgroup>
                 <optgroup label="Fraternity and Sorority">
                   {organizations
-                    .filter(org => org.type === 'FRATERNITY AND SORORITY')
+                    .filter(org => org.type === 'FRATERNITY AND SORORITY' && org.status === 'Active')
                     .map((org) => (
                       <option key={org._id} value={org.name}>{org.name}</option>
                     ))}
