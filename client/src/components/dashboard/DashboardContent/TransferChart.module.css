@@ -1,7 +1,7 @@
 .chartContainer {
     background-color: #fff;
     border-radius: 10px;
-    padding: 30px;
+    padding: 20px;
   }
   
   .chartTitle {
@@ -14,12 +14,12 @@
   .barChart {
     display: flex;
     align-items: flex-end;
-    gap: 20px;
+    gap: 45px;
     height: 200px;
   }
   
   .bar {
-    width: 26px;
+    width: 30px;
     background-color: #344bfd;
     border-radius: 5px;
     transition: height 0.3s ease;
