@@ -54,7 +54,7 @@ const Login = () => {
         if (data.user.role === 'admin') {
             navigate('/admin/dashboard');
         } else if (data.user.role === 'officer' && data.user.status === 'active') {
-            navigate('/dashboard');
+            navigate('/dashboard', { state: { filter: 'all', view: 'documents' } });
         } else if (data.user.status === 'pending') {
             setError('Your account is pending approval');
         }
@@ -113,7 +113,7 @@ const Login = () => {
         if (data.user.role === 'admin') {
             navigate('/admin/dashboard');
         } else if (data.user.role === 'officer' && data.user.status === 'active') {
-            navigate('/dashboard');
+            navigate('/dashboard', { state: { filter: 'all', view: 'documents' } });
         }
 
     } catch (error) {
