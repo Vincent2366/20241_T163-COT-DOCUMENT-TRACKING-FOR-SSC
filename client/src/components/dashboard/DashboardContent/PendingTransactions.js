@@ -1,6 +1,6 @@
 import styles from './TransactionHistory.module.css';
 import { useState, useEffect } from 'react';
-
+import FeedbackMessage from '../../feedbackMessage';
 
 export function PendingTransactions() {
   const [documents, setDocuments] = useState([]);
@@ -21,6 +21,8 @@ export function PendingTransactions() {
   const [routePurpose, setRoutePurpose] = useState('');
   const [documentHistory, setDocumentHistory] = useState(null);
   const [historyDocument, setHistoryDocument] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -210,9 +212,15 @@ export function PendingTransactions() {
         setRemarks('');
         setRoutePurpose('');
         setSelectedDocument(null);
+        setSuccessMessage('Document forwarded successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+      } else {
+        throw new Error('Failed to forward document');
       }
     } catch (error) {
       console.error('Error forwarding document:', error);
+      setErrorMessage('Failed to forward document. Please try again.');
+      setTimeout(() => setErrorMessage(''), 3000); // Clear message after 3 seconds
     }
   };
 
@@ -246,14 +254,16 @@ export function PendingTransactions() {
         setKeepingRemarks('');
         setSelectedDocument(null);
         
-        // Optional: Show success message
-        alert('Document status updated successfully');
+        // Show success message
+        setSuccessMessage('Document status updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
       } else {
         throw new Error('Failed to update document status');
       }
     } catch (error) {
       console.error('Error updating document status:', error);
-      alert('Failed to update document status');
+      setErrorMessage('Failed to update document status. Please try again.');
+      setTimeout(() => setErrorMessage(''), 3000); // Clear message after 3 seconds
     }
   };
 
@@ -328,6 +338,9 @@ export function PendingTransactions() {
           </div>
         </div>
       </header>
+
+      {errorMessage && <FeedbackMessage message={errorMessage} type="error" />}
+      {successMessage && <FeedbackMessage message={successMessage} type="success" />}
 
       <table className={styles.transactionTable}>
         <thead>
