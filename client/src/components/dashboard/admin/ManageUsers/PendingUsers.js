@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageUserUI.module.css';
+import FeedbackMessage from '../../../feedbackMessage';
 
-export default function PendingUsers() {
+const PendingUsers = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
 
   useEffect(() => {
     fetchPendingUsers();
@@ -53,10 +56,17 @@ export default function PendingUsers() {
       const result = await response.json();
       console.log('Approval result:', result);
 
+      setFeedbackMessage('User approved successfully! ✅');
+      setFeedbackType('success');
+      setTimeout(() => setFeedbackMessage(''), 3000);
+
       await fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
       setError(error.message);
+      setFeedbackMessage('Error approving user.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
     }
   };
 
@@ -93,6 +103,8 @@ export default function PendingUsers() {
 
   return (
     <div className={styles.container}>
+      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
+
       <div className={styles.orgHeader}>
         <h1 className={styles.orgTitle}>Pending User Approvals</h1>
         <div className={styles.controls}>
@@ -170,4 +182,6 @@ export default function PendingUsers() {
       </div>
     </div>
   );
-}
+};
+
+export default PendingUsers;

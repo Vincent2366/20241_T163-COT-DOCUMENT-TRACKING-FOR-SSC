@@ -133,3 +133,19 @@
   cursor: not-allowed;
   transform: none;
 }
+/* Add this to your ManageUserUI.module.css or relevant CSS file */
+.feedbackMessage {
+    color: green; /* Change to your desired color */
+    font-weight: bold;
+    margin: 10px 0;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
