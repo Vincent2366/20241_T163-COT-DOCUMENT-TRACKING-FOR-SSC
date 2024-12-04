@@ -132,10 +132,7 @@ const Login = () => {
       </div>
       <div className="form-section">
         <div className="form-content">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ color: 'skyblue' }}>Welcome to <span style={{ color: '#448EE4', fontWeight: 'bold' }}>DocuTrack</span></h2>
-            <p style={{ fontSize: '14px' }}><br />No account?<br /> <Link to="/sign-up" className="signup-link">Sign Up</Link></p>
-          </div>
+          <h2 style={{ color: 'skyblue' }}>Welcome to <span style={{ color: '#448EE4', fontWeight: 'bold' }}>DocuTrack</span></h2>
           <h1>Sign in</h1>
           
           {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
@@ -175,14 +172,14 @@ const Login = () => {
               value={formData.password}
               onChange={handleInputChange}
             />
-       
+           <Link to="/forgot-password" className="forgot-password">Forgot Password?</Link>
+
             <ReCAPTCHA
               sitekey="6LdeY2oqAAAAAGSi81scus4rs5Rz8WM8yeWcdfrZ"
               ref={recaptchaRef}
               onChange={handleCaptchaChange}
             />
             
-            <Link to="/forgot-password" className="forgot-password">Forgotten Password?</Link>
             <button 
               type="submit" 
               className="sign-in-btn"
@@ -190,6 +187,10 @@ const Login = () => {
               Sign in
             </button>
           </form>
+
+          <p style={{ textAlign: 'center', marginTop: '20px' }}>
+            No account? <Link to="/sign-up" className="signup-link">Sign Up</Link>
+          </p>
         </div>
       </div>
     </div>

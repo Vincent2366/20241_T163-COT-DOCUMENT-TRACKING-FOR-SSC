@@ -52,9 +52,11 @@ const Signup = () => {
         setError('Please select a valid organization');
         return;
       }
+
       // Validate email format
-      if (!formData.email.endsWith('@student.buksu.edu.ph')) {
-        setError('Please use a valid BukSU student email address');
+      const emailPattern = /.+@(student\.buksu\.edu\.ph||buksu\.edu\.ph)$/;
+      if (!emailPattern.test(formData.email)) {
+        setError('Please use a valid BukSU email address');
         return;
       }
 
@@ -99,14 +101,14 @@ const Signup = () => {
   return (
     <div className="signup-container">
       <div className="logo-section">
-        <img src={logo} alt="Logo" className="logo" style={{ width: '450px', height: 'auto', paddingBottom: '100px' }}/>
+        <img src={logo} alt="Logo" className="logo" style={{ width: '450px', height: 'auto', paddingBottom: '100px' }} />
         <h1><span style={{ color: 'blue' }}></span></h1>
       </div>
       <div className="form-section">
         <div className="form-content1">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ color: 'skyblue' }}>Welcome to <span style={{ color: '#448EE4', fontWeight: 'bold' }}>DocuTrack</span></h2>
-            <p style={{ fontSize: '14px' }}><br />Have account?<br /> <Link to="/" className="signup-link">Sign In</Link></p>
+            <p style={{ fontSize: '14px' }}><br />Have an account?<br /> <Link to="/" className="signup-link">Sign In</Link></p>
           </div>
           <h1>Sign Up</h1>
           {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
@@ -119,7 +121,7 @@ const Signup = () => {
               required 
               value={formData.email}
               onChange={handleChange}
-              pattern=".+@student\.buksu\.edu\.ph"
+              pattern=".+@(student\.buksu\.edu\.ph|buksu\.edu\.ph)"
               title="Please use your BukSU student email"
             />
             <br />

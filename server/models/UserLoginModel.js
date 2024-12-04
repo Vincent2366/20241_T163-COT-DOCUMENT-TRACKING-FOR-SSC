@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
         validate: {
             validator: function(email) {
                 if (this.role === 'admin') return true;
-                return email.endsWith('@student.buksu.edu.ph');
+                return email.endsWith('@student.buksu.edu.ph') || email.endsWith('@buksu.edu.ph');
             },
             message: 'Please use a valid BukSU student email'
         }

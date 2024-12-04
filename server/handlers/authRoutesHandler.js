@@ -26,10 +26,10 @@ authRoutesHandler.register = async (req, res) => {
         });
 
         // Validate email format
-        if (!email.endsWith('@student.buksu.edu.ph')) {
-            return res.status(400).json({
-                error: 'Please use a valid BukSU student email address'
-            });
+        if (!email.endsWith('@student.buksu.edu.ph') && !email.endsWith('@buksu.edu.ph')) {
+          return res.status(400).json({
+              error: 'Please use a valid BukSU email address'
+          });
         }
 
         // Check if user already exists
@@ -339,9 +339,11 @@ authRoutesHandler.googleLogin = async (req, res) => {
         const payload = ticket.getPayload();
         const email = payload.email;
         
-        if (!email.endsWith('@student.buksu.edu.ph')) {
-            return res.status(403).json({ error: 'Please use a BukSU student email' });
-        }
+        if (!email.endsWith('@student.buksu.edu.ph') && !email.endsWith('@buksu.edu.ph')) {
+          return res.status(400).json({
+              error: 'Please use a valid BukSU email address'
+          });
+      }
 
         let user = await User.findOne({ email: email });
         

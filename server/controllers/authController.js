@@ -136,8 +136,8 @@ exports.googleLogin = async (req, res) => {
     const email = payload.email;
 
     // Check if email is a valid BukSU email
-    if (!email.endsWith('@student.buksu.edu.ph')) {
-      return res.status(400).json({ error: 'Please use a valid BukSU student email address' });
+    if (!email.endsWith('@student.buksu.edu.ph') && !email.endsWith('@buksu.edu.ph')) {
+      return res.status(400).json({ error: 'Please use a valid BukSU email address' });
     }
 
     // Find or create user
