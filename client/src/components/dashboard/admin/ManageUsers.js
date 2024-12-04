@@ -35,6 +35,18 @@ const ManageUsers = () => {
     fetchUsers();
   }, [navigate]);
 
+  const onUpdateUserStatus = (userID, newStatus) => {
+    setUsers(prevUsers =>
+      prevUsers.map(user =>
+        user._id === userID ? { ...user, status: newStatus } : user
+      )
+    );
+  };
+
+  const onDeleteUser = (userID) => {
+    setUsers(prevUsers => prevUsers.filter(user => user._id !== userID));
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -46,7 +58,11 @@ const ManageUsers = () => {
       <div className={styles.mainContainer}>
         <AdminSideNavigation />
         <main className={styles.mainContent}>
-          <ManageUserUI users={users} />
+          <ManageUserUI 
+            users={users} 
+            onDeleteUser={onDeleteUser} 
+            onUpdateUserStatus={onUpdateUserStatus} 
+          />
         </main>
       </div>
     </div>

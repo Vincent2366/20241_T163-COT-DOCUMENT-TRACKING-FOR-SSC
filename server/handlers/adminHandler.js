@@ -96,5 +96,28 @@ adminHandler.organizationsStatus = async (req, res) => {
     }
 }
 
+adminHandler.toggleUserStatus = async (req, res) => {
+    const { userId } = req.params;
+    console.log('User ID:', userId);
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        user.status = user.status === 'active' ? 'inactive' : 'active';
+        await user.save();
+
+        res.json({
+            message: 'User status updated successfully',
+            user
+        });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = adminHandler

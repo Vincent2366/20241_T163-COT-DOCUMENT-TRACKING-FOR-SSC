@@ -66,30 +66,43 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
   };
 
   const toggleUserStatus = async (userID, currentStatus) => {
-    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+    // Confirmation prompt
+    const confirmationMessage = currentStatus === 'active' 
+        ? `Are you sure you want to Freeze this User?` 
+        : `Are you sure you want to Unfreeze this User?`;
+
+    if (!window.confirm(confirmationMessage)) {
+        return; // Exit if the user cancels
+    }
+
+    // Optimistically update the UI
+    onUpdateUserStatus(userID, newStatus);
 
     try {
-      const response = await fetch(`http://localhost:2000/api/users/${userID}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
+        const response = await fetch(`http://localhost:2000/api/users/${userID}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error details:', errorData);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error details:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      onUpdateUserStatus(userID, newStatus);
-      console.log(`User status updated successfully: ${userID}, ${newStatus}`);
+        console.log(`User status updated successfully: ${userID}, ${newStatus}`);
     } catch (error) {
-      console.error('Error updating user status:', error);
+        console.error('Error updating user status:', error);
     }
   };
+
+  console.log('onUpdateUserStatus:', onUpdateUserStatus);
 
   if (loading) {
     return <div>Loading...</div>;

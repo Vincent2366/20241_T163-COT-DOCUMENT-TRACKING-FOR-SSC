@@ -18,4 +18,7 @@ router.get('/organizations', isAdmin, adminHandler.organizations);
 // Update organization status
 router.put('/organizations/:orgId/status', isAdmin, adminHandler.organizationsStatus);
 
+// Freeze or unfreeze user account
+router.put('/users/:userId/status', adminHandler.toggleUserStatus);
+
 module.exports = router;  
