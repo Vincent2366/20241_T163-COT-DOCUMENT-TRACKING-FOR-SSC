@@ -44,6 +44,13 @@
 .orgTable tr:hover {
     background-color: #f1f1f1;
 }
+.orgTable td {
+  max-width: 300px; /* Set a max width for the cell */
+  overflow: hidden; /* Hide overflow */
+  white-space: nowrap; /* Prevent text from wrapping */
+  text-overflow: ellipsis; /* Add ellipsis for overflow */
+  word-wrap: break-word;
+}
 
 .popup {
     position: fixed;

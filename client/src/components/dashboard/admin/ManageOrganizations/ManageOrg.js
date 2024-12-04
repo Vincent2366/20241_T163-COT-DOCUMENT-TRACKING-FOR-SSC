@@ -1,5 +1,6 @@
 import styles from './ManageOrg.module.css';
 import { useState, useEffect } from 'react';
+import FeedbackMessage from '../../../feedbackMessage';
 
 export function ManageOrg() {
   const [selectedOrg, setSelectedOrg] = useState(null);
@@ -10,6 +11,8 @@ export function ManageOrg() {
   const itemsPerPage = 10; 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editOrg, setEditOrg] = useState({ id: '', name: '', status: '' });
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
 
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -92,9 +95,16 @@ export function ManageOrg() {
         prevData.map((org) => (org._id === updatedData._id ? updatedData : org))
       );
 
+      setFeedbackMessage('Organization updated successfully! ✅');
+      setFeedbackType('success');
+      setTimeout(() => setFeedbackMessage(''), 2000);
+
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('Error updating organization:', error);
+      setFeedbackMessage('Error updating organization.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
     }
   };
 
@@ -119,8 +129,14 @@ export function ManageOrg() {
   
       setOrgData((prevData) => prevData.filter((org) => org._id !== orgId));
       console.log('Organization deleted successfully:', orgId);
+      setFeedbackMessage('Organization deleted successfully! ✅');
+      setFeedbackType('success');
+      setTimeout(() => setFeedbackMessage(''), 2000);
     } catch (error) {
       console.error('Error deleting organization:', error);
+      setFeedbackMessage('Error deleting organization.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
     }
   };
   
@@ -131,6 +147,8 @@ export function ManageOrg() {
 
   return (
     <div className={styles.orgSection}>
+      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
+
       <div className={styles.controls}>
         <input 
           type="search" 
