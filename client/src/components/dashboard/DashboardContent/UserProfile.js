@@ -3,6 +3,7 @@ import styles from './UserProfile.module.css';
 import logo from '../../../assets/SSClogo.png';
 import axios from 'axios';
 import Modal from 'react-modal';
+import FeedbackMessage from '../../feedbackMessage';
 
 // Set the app element for accessibility
 Modal.setAppElement('#root');
@@ -20,7 +21,9 @@ export function UserProfile() {
     role: '',
     status: '',
     profilePicture: null,
-    driveFileLink: null
+    driveFileLink: null,
+    password: '',
+    confirmPassword: ''
   });
   const [organizations, setOrganizations] = useState([]);
 
@@ -67,7 +70,6 @@ export function UserProfile() {
       
       console.log('Profile data:', response.data);
       
-      // Store the complete URL in state
       const profilePicture = response.data.profilePicture || 'https://via.placeholder.com/150';
 
       setFormData(prev => ({
@@ -76,9 +78,7 @@ export function UserProfile() {
         profilePicture: profilePicture
       }));
       
-      // Store profile picture URL in localStorage for persistence
       localStorage.setItem('userProfilePicture', profilePicture);
-      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -87,7 +87,6 @@ export function UserProfile() {
     }
   };
 
-  // Add this useEffect to initialize profile picture from localStorage
   useEffect(() => {
     const savedProfilePicture = localStorage.getItem('userProfilePicture');
     if (savedProfilePicture) {
@@ -140,7 +139,6 @@ export function UserProfile() {
           profilePicture: newProfilePicture
         }));
         
-        // Update localStorage with new profile picture URL
         localStorage.setItem('userProfilePicture', newProfilePicture);
         
         setSuccessMessage('Profile picture updated successfully');
@@ -186,6 +184,7 @@ export function UserProfile() {
       }));
       setIsModalOpen(false);
       setSuccessMessage('Profile updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
     }
@@ -195,87 +194,89 @@ export function UserProfile() {
     <div className={styles.profileContainer}>
       {loading ? (
         <div className={styles.loading}>Loading profile...</div>
-      ) : error ? (
-        <div className={styles.error}>{error}</div>
       ) : (
-        <div className={styles.profileCard}>
-          <div className={styles.profileHeader}>
-            <div className={styles.profilePictureContainer} onClick={handleImageClick}>
-              <img
-                src={formData.profilePicture}
-                alt="Profile"
-                className={styles.profilePicture}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/150';
-                }}
-              />
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageChange}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
+        <>
+          <FeedbackMessage message={successMessage} type="success" />
+          <FeedbackMessage message={error} type="error" />
+          <div className={styles.profileCard}>
+            <div className={styles.profileHeader}>
+              <div className={styles.profilePictureContainer} onClick={handleImageClick}>
+                <img
+                  src={formData.profilePicture}
+                  alt="Profile"
+                  className={styles.profilePicture}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/150';
+                  }}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                />
+              </div>
+              <h1>Profile Information</h1>
             </div>
-            <h1>Profile Information</h1>
+
+            <div className={styles.profileContent}>
+              <div className={styles.profileForm}>
+                <div className={styles.formGroup}>
+                  <label>Username</label>
+                  <input 
+                    type="text" 
+                    value={formData.username}
+                    disabled
+                    className={styles.formInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Email</label>
+                  <input 
+                    type="email" 
+                    value={formData.email}
+                    disabled
+                    className={styles.formInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Organization</label>
+                  <input 
+                    type="text" 
+                    value={formData.organization}
+                    disabled
+                    className={styles.formInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Role</label>
+                  <input 
+                    type="text" 
+                    value={formData.role}
+                    disabled
+                    className={styles.formInput}
+                  />
+                </div>
+
+                <button 
+                  className={styles.editButton}
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  Edit Profile
+                </button>
+              </div>
+
+              <div className={styles.logoSection}>
+                <img src={logo} alt="BSU Logo" className={styles.bsuLogo} />
+              </div>
+            </div>
           </div>
-
-          <div className={styles.profileContent}>
-            <div className={styles.profileForm}>
-              <div className={styles.formGroup}>
-                <label>Username</label>
-                <input 
-                  type="text" 
-                  value={formData.username}
-                  disabled
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Email</label>
-                <input 
-                  type="email" 
-                  value={formData.email}
-                  disabled
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Organization</label>
-                <input 
-                  type="text" 
-                  value={formData.organization}
-                  disabled
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Role</label>
-                <input 
-                  type="text" 
-                  value={formData.role}
-                  disabled
-                  className={styles.formInput}
-                />
-              </div>
-
-              <button 
-                className={styles.editButton}
-                onClick={() => setIsModalOpen(true)}
-              >
-                Edit Profile
-              </button>
-            </div>
-
-            <div className={styles.logoSection}>
-              <img src={logo} alt="BSU Logo" className={styles.bsuLogo} />
-            </div>
-          </div>
-        </div>
+        </>
       )}
 
       {isModalOpen && (
