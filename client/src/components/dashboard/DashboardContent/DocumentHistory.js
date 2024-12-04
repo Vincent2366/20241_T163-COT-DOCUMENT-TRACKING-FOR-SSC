@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './TransactionHistory.module.css';
 import { useNavigate } from 'react-router-dom';
+import FeedbackMessage from '../../feedbackMessage';
 
 export function DocumentHistory({ type }) {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
   const [userOrg, setUserOrg] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('newest');
@@ -201,12 +203,22 @@ export function DocumentHistory({ type }) {
         })
       });
 
-      // ... rest of the function
+      if (response.ok) {
+        setSuccessMessage('Document status updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setError('Failed to update document status.');
+        setTimeout(() => setError(''), 3000);
+      }
     } catch (error) {
       console.error('Error updating document status:', error);
-      alert('Failed to update status. Please try again.');
+      setError('An error occurred while updating the status.');
+      setTimeout(() => setError(''), 3000);
     }
   };
+
+  console.log('Error:', error);
+  console.log('Success Message:', successMessage);
 
   return (
     <section className={styles.historySection}>
@@ -250,6 +262,9 @@ export function DocumentHistory({ type }) {
         </div>
       </header>
 
+      {error && <FeedbackMessage message={error} type="error" />}
+      {successMessage && <FeedbackMessage message={successMessage} type="success" />}
+
       <table className={styles.transactionTable}>
         <thead>
           <tr>
@@ -279,7 +294,11 @@ export function DocumentHistory({ type }) {
                 <td>{doc.remarks}</td>
                 <td>{doc.originalSender || '-'}</td>
                 <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
-                <td>{doc.status}</td>
+                <td>
+                  <button onClick={() => handleStatusChange(doc._id, doc.status)}>
+                    {doc.status}
+                  </button>
+                </td>
               </tr>
             ))
           ) : (
