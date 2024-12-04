@@ -14,11 +14,13 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
     }
   }, [users]);
 
+  // Filter users based on status and search term
   const filteredData = searchTerm 
     ? users.filter(user => 
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
+        (user.username.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (user.status === 'active' || user.status === 'inactive')
       )
-    : users;
+    : users.filter(user => user.status === 'active' || user.status === 'inactive');
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
