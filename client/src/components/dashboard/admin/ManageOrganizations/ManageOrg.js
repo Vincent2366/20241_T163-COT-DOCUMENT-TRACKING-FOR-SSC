@@ -42,7 +42,9 @@ export function ManageOrg() {
 
   const filteredData = searchTerm 
     ? orgData.filter(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.organizationId?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         item.status?.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     : orgData;
 
@@ -140,7 +142,6 @@ export function ManageOrg() {
     }
   };
   
-
   if (loading) {
     return <div>Loading...</div>;
   }
