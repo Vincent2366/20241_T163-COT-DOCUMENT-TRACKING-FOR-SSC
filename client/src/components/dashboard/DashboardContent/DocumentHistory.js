@@ -295,9 +295,7 @@ export function DocumentHistory({ type }) {
                 <td>{doc.originalSender || '-'}</td>
                 <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <button onClick={() => handleStatusChange(doc._id, doc.status)}>
-                    {doc.status}
-                  </button>
+                  <span className={styles.statusText}>{doc.status}</span>
                 </td>
               </tr>
             ))
