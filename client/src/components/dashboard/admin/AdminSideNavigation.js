@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../SideNavigation/SideNavigation.module.css';
 import { NavigationItem } from '../SideNavigation/NavigationItem';
 import Modal from '../../Modal';
+import FeedbackMessage from '../../feedbackMessage';
 
 const adminNavigationItems = [
   { icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/005c7a1fc7b800da9ed0eb7da389c028dba409099cc177f99c94e1fb260ee196?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a", 
@@ -35,8 +36,8 @@ const AdminSideNavigation = () => {
   const [isAddOrgModalOpen, setAddOrgModalOpen] = useState(false);
   const [orgName, setOrgName] = useState('');
   const [orgType, setOrgType] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
   const navigate = useNavigate();
 
   const handleItemClick = (label, link) => {
@@ -57,14 +58,12 @@ const AdminSideNavigation = () => {
 
   const handleAddOrgSubmit = async (e) => {
     e.preventDefault();
-    setSuccessMessage('');
-    setErrorMessage('');
+    setFeedbackMessage('');
     setIsLoading(true);
 
-    console.log("orgType value:", orgType);
-
     if (!orgType) {
-      setErrorMessage('Please select an organization type.');
+      setFeedbackMessage('Please select an organization type.');
+      setFeedbackType('error');
       setIsLoading(false);
       return;
     }
@@ -95,16 +94,18 @@ const AdminSideNavigation = () => {
 
       setOrgName('');
       setOrgType('');
-      setSuccessMessage('Successfully created!');
+      setFeedbackMessage('Successfully created! ✅');
+      setFeedbackType('success');
       setAddOrgModalOpen(false);
 
       setTimeout(() => {
-        setSuccessMessage('');
+        setFeedbackMessage('');
       }, 2000);
     } catch (error) {
       console.error('Error:', error);
-      setErrorMessage(error.message);
-      setTimeout(() => setErrorMessage(''), 3000);
+      setFeedbackMessage(error.message);
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
     } finally {
       setIsLoading(false);
     }
@@ -112,10 +113,7 @@ const AdminSideNavigation = () => {
 
   return (
     <div>
-      <div className={styles.messageContainer}>
-        {successMessage && <div className={styles.success}>{successMessage}</div>}
-        {errorMessage && <div className={styles.error}>{errorMessage}</div>}
-      </div>
+      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
 
       <nav className={styles.sideNav}>
         {adminNavigationItems.map((item, index) => (
@@ -131,39 +129,38 @@ const AdminSideNavigation = () => {
           </div>
         ))}
 
-        
-          <Modal isOpen={isAddOrgModalOpen} onClose={() => setAddOrgModalOpen(false)} title="Add New Organization">
-            <form className={styles.modalContent} onSubmit={handleAddOrgSubmit}>
-              <label>
-                Organization:
-                <input 
-                  type="text" 
-                  placeholder="Enter organization name" 
-                  value={orgName} 
-                  onChange={(e) => setOrgName(e.target.value)} 
-                  required 
-                />
-              </label>
-              <label>
-                Organization Type:
-                <select 
-                  value={orgType} 
-                  onChange={(e) => setOrgType(e.target.value)} 
-                  required
-                >
-                  <option value="" disabled>Select type</option>
-                  <option value="USG/Institutional">USG/Institutional</option>
-                  <option value="ACADEMIC">Academic</option>
-                  <option value="CIVIC">Civic</option>
-                  <option value="RELIGIOUS">Religious</option>
-                  <option value="FRATERNITY AND SORORITY">Fraternity and Sorority</option>
-                </select>
-              </label>
-              <button type="submit" className={styles.submitButton} disabled={isLoading}>
-                {isLoading ? 'Creating...' : 'Add Organization'}
-              </button>
-            </form>
-          </Modal>
+        <Modal isOpen={isAddOrgModalOpen} onClose={() => setAddOrgModalOpen(false)} title="Add New Organization">
+          <form className={styles.modalContent} onSubmit={handleAddOrgSubmit}>
+            <label>
+              Organization:
+              <input 
+                type="text" 
+                placeholder="Enter organization name" 
+                value={orgName} 
+                onChange={(e) => setOrgName(e.target.value)} 
+                required 
+              />
+            </label>
+            <label>
+              Organization Type:
+              <select 
+                value={orgType} 
+                onChange={(e) => setOrgType(e.target.value)} 
+                required
+              >
+                <option value="" disabled>Select type</option>
+                <option value="USG/Institutional">USG/Institutional</option>
+                <option value="ACADEMIC">Academic</option>
+                <option value="CIVIC">Civic</option>
+                <option value="RELIGIOUS">Religious</option>
+                <option value="FRATERNITY AND SORORITY">Fraternity and Sorority</option>
+              </select>
+            </label>
+            <button type="submit" className={styles.submitButton} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Add Organization'}
+            </button>
+          </form>
+        </Modal>
       </nav>
     </div>
   );
