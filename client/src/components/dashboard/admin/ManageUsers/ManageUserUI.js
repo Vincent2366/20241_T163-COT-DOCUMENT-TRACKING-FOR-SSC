@@ -1,5 +1,6 @@
 import styles from './ManageUserUI.module.css';
 import { useState, useEffect } from 'react';
+import FeedbackMessage from '../../../feedbackMessage';
 
 export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {  
   const [loading, setLoading] = useState(true);
@@ -7,6 +8,8 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; 
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
 
   useEffect(() => {
     if (users.length > 0) {
@@ -83,7 +86,7 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
     onUpdateUserStatus(userID, newStatus);
 
     try {
-        const response = await fetch(`http://localhost:2000/api/users/${userID}/status`, {
+        const response = await fetch(`http://localhost:2000/api/users/${userID}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -99,12 +102,15 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
         }
 
         console.log(`User status updated successfully: ${userID}, ${newStatus}`);
+        setFeedbackMessage(`User ${newStatus === 'inactive' ? 'frozen' : 'unfrozen'} successfully! ✅`);
+        setFeedbackType('success');
+        setTimeout(() => setFeedbackMessage(''), 2000);
     } catch (error) {
-        console.error('Error updating user status:', error);
+        setFeedbackMessage('Error updating user status.');
+        setFeedbackType('error');
+        setTimeout(() => setFeedbackMessage(''), 3000);
     }
   };
-
-  console.log('onUpdateUserStatus:', onUpdateUserStatus);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -113,6 +119,8 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
 
   return (
     <div className={styles.container}>
+      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
+
       <div className={styles.orgHeader}>
         <h1 className={styles.orgTitle}>Manage Users</h1>
         <div className={styles.controls}>

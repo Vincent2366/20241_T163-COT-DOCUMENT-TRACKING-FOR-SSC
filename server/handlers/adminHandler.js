@@ -115,7 +115,6 @@ adminHandler.toggleUserStatus = async (req, res) => {
             user
         });
     } catch (error) {
-        console.error('Error updating user status:', error);
         res.status(500).json({ error: error.message });
     }
 };
