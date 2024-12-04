@@ -22,19 +22,6 @@ const documentItems = [
     label: "All", 
     view: "transactions"
   },
-  { 
-    icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/299f0b10ae60643f7737cf49c147dcc13c34aad7e5b16295767fbcbfae42acd2", 
-    label: "In Transit", 
-    link: "/dashboard/history/in-transit",
-    view: "documents"
-  },
-  { 
-    icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/c23e99a6561a8d6f026efdd6ce16ade880ca84befe6ed8629ae672d7b96ade03", 
-    label: "Finished", 
-    link: "/dashboard/history/finished",
-    view: "documents"
-  },
-
 ];
 
 const SideNavigation = () => {
@@ -236,7 +223,7 @@ const SideNavigation = () => {
 
         if (successCount > 0) {
             setSuccessMessage(`Successfully created ${successCount} document(s)`);
-            setTimeout(() => setSuccessMessage(''), 3000); // Clear success message after 3 seconds
+            setTimeout(() => setSuccessMessage(''), 3000);
             if (failCount === 0) {
                 setModalOpen(false);
                 e.target.reset();
@@ -397,9 +384,7 @@ const SideNavigation = () => {
                 className={styles.textarea}
               ></textarea>
             </div>
-            
-           
-            
+
             <button 
               type="submit" 
               className={styles.submitButton}
