@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import styles from './Header.module.css';
 import axios from 'axios';
+import logo from '../../../assets/logo2.png';
 
 const CLIENT_ID = '465216288473-9t6vhd30arvjfjtogqinvbtj9a6vnmjc.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyCAq7zCrb2WvN03qb52D0FHsPfY3OEzO-o';
@@ -133,7 +134,11 @@ export function Header() {
   return (
     <header className={styles.headerContainer}>
       <div className={styles.logoSection}>
-        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/7d8957aa15cd019cfb7e4d3d8cd8e10643cc08e791928cc651246f452f1a63ec?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" alt="Company Logo" className={styles.mainLogo} />
+        <img 
+          src={logo} 
+          alt="Logo" 
+          className={styles.logo}
+        />
         <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/afae7e68f233fb9ccd60978ad0ed1cf569a5748d87997d3f6cdf60cd8ea424c1?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" alt="Secondary Logo" className={styles.secondaryLogo} />
       </div>
       <div className={styles.userSection}>

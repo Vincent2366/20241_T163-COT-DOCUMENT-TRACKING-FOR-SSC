@@ -9,8 +9,8 @@
 
 .logoSection {
   display: flex;
-  align-items: center;
-  gap: 40px;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
 }
 
 .mainLogo {
@@ -288,3 +288,9 @@ z-index: 1000;
   color: #007bff; /* or any color you prefer for hover state */
 }
 /* ... (rest of the styles remain the same) */
+
+.logo {
+  width: 150px; /* Adjust this value to make the logo smaller */
+  height: auto; /* Maintain aspect ratio */
+  padding-bottom: 2px; /* Adjust padding if needed */
+}
