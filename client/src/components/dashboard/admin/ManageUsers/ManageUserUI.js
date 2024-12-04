@@ -17,17 +17,17 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
     }
   }, [users]);
 
-  // Filter users based on status, search term, and exclude admins
+  // Filter users based on search term and exclude admins
   const filteredData = searchTerm 
     ? users.filter(user => 
-        (user.username.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (user.status === 'active' || user.status === 'inactive') &&
+        (user.username?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         user.organization?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         user.role?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         user.status?.toLowerCase().includes(searchTerm.toLowerCase())) &&
         user.role !== 'admin' // Exclude admin users
       )
-    : users.filter(user => 
-        (user.status === 'active' || user.status === 'inactive') &&
-        user.role !== 'admin' // Exclude admin users
-      );
+    : users.filter(user => user.role !== 'admin'); // Exclude admin users
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -137,7 +137,7 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search by username"
+            placeholder="Search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
