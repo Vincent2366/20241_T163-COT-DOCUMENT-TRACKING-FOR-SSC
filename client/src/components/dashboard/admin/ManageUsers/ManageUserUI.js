@@ -65,8 +65,14 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
 
       onDeleteUser(userID);
       console.log('User deleted successfully:', userID);
+      setFeedbackMessage('User deleted successfully! ✅');
+      setFeedbackType('success');
+      setTimeout(() => setFeedbackMessage(''), 2000);
     } catch (error) {
       console.error('Error deleting user:', error);
+      setFeedbackMessage('Error deleting user.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
     }
   };
 
