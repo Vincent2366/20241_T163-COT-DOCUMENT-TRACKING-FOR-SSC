@@ -17,13 +17,17 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
     }
   }, [users]);
 
-  // Filter users based on status and search term
+  // Filter users based on status, search term, and exclude admins
   const filteredData = searchTerm 
     ? users.filter(user => 
         (user.username.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (user.status === 'active' || user.status === 'inactive')
+        (user.status === 'active' || user.status === 'inactive') &&
+        user.role !== 'admin' // Exclude admin users
       )
-    : users.filter(user => user.status === 'active' || user.status === 'inactive');
+    : users.filter(user => 
+        (user.status === 'active' || user.status === 'inactive') &&
+        user.role !== 'admin' // Exclude admin users
+      );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
