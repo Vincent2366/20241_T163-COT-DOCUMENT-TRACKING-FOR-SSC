@@ -5,6 +5,7 @@ import { NavigationItem } from './NavigationItem';
 import Modal from '../../Modal'; 
 import axios from 'axios';
 import { Select, Checkbox } from 'antd'; 
+import FeedbackMessage from '../../feedbackMessage';
 
 axios.defaults.baseURL = 'http://localhost:2000'; 
 
@@ -177,73 +178,80 @@ const SideNavigation = () => {
 
     // Validate recipients
     if (selectedRecipients.length === 0) {
-      setError('Please select at least one recipient');
-      setIsLoading(false);
-      return;
+        setError('Please select at least one recipient');
+        setIsLoading(false);
+        return;
     }
 
     try {
-      const formData = new FormData(e.target);
-      const baseSerialNumber = formData.get('serialNumber');
-      const baseDocumentData = {
-        documentName: formData.get('documentName'),
-        description: formData.get('description'),
-        userId: currentUser?.username,
-        remarks: formData.get('remarks'),
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        currentOffice: currentUser?.organization,
-        originalSender: currentUser?.organization
-      };
+        const formData = new FormData(e.target);
+        const baseSerialNumber = formData.get('serialNumber');
+        const baseDocumentData = {
+            documentName: formData.get('documentName'),
+            description: formData.get('description'),
+            userId: currentUser?.username,
+            remarks: formData.get('remarks'),
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            currentOffice: currentUser?.organization,
+            originalSender: currentUser?.organization
+        };
 
-      let successCount = 0;
-      let failCount = 0;
+        let successCount = 0;
+        let failCount = 0;
 
-      // Process each recipient sequentially
-      for (let i = 0; i < selectedRecipients.length; i++) {
-        const recipient = selectedRecipients[i];
-        try {
-          console.log('Submitting document for recipient:', recipient);
-          
-          // Create unique serial number for each recipient
-          const serialSuffix = selectedRecipients.length > 1 ? `-${i + 1}` : '';
-          const serialNumber = `${baseSerialNumber}${serialSuffix}`;
-          
-          const response = await axios.post('/api/documents/new', {
-            ...baseDocumentData,
-            serialNumber,
-            recipient: recipient.trim()
-          });
-          
-          if (response.data.success) {
-            successCount++;
-          }
-        } catch (error) {
-          console.error('Failed to create document for:', recipient, error);
-          failCount++;
+        // Process each recipient sequentially
+        for (let i = 0; i < selectedRecipients.length; i++) {
+            const recipient = selectedRecipients[i];
+            try {
+                console.log('Submitting document for recipient:', recipient);
+                
+                // Create unique serial number for each recipient
+                const serialSuffix = selectedRecipients.length > 1 ? `-${i + 1}` : '';
+                const serialNumber = `${baseSerialNumber}${serialSuffix}`;
+                
+                const response = await axios.post('/api/documents/new', {
+                    ...baseDocumentData,
+                    serialNumber,
+                    recipient: recipient.trim()
+                });
+                
+                if (response.data.success) {
+                    successCount++;
+                }
+            } catch (error) {
+                console.error('Failed to create document for:', recipient, error);
+                failCount++;
+                
+                // Check for specific error messages
+                if (error.response && error.response.data) {
+                    setError('Serial Number already in use');
+                    setTimeout(() => setError(''), 3000); // Clear error after 3 seconds
+                } else {
+                    setError('An unknown error occurred');
+                    setTimeout(() => setError(''), 3000); // Clear error after 3 seconds
+                }
+            }
         }
-      }
 
-      if (successCount > 0) {
-        setSuccessMessage(`Successfully created ${successCount} document(s)`);
-        if (failCount === 0) {
-          setModalOpen(false);
-          e.target.reset();
-          setSelectedRecipients([]);
+        if (successCount > 0) {
+            setSuccessMessage(`Successfully created ${successCount} document(s)`);
+            setTimeout(() => setSuccessMessage(''), 3000); // Clear success message after 3 seconds
+            if (failCount === 0) {
+                setModalOpen(false);
+                e.target.reset();
+                setSelectedRecipients([]);
+            }
         }
-      }
-
-      if (failCount > 0) {
-        setError(`Failed to create ${failCount} document(s)`);
-      }
 
     } catch (error) {
-      console.error('Error response:', error.response?.data);
-      setError(error.response?.data?.message || 'Failed to create document');
+        console.error('Error response:', error.response?.data);
+        setError('Serial Number already in use'); // Use the shortened message here as well
+        setTimeout(() => setError(''), 3000); // Clear error after 3 seconds
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   const getAllOrganizationNames = () => {
     return organizations.map(org => org.name);
@@ -271,13 +279,13 @@ const SideNavigation = () => {
         </div>
       ))}
       
+     
+      {successMessage && <FeedbackMessage message={successMessage} type="success" />}
       
-      {/* Modal */}
       <Modal isOpen={isModalOpen} onClose={closeModal} title={modalTitle}>
+      {error && <FeedbackMessage message={error} type="error" />}
         {modalContent === "new-document" && (
           <form className={styles.modalContent} onSubmit={handleSubmit}>
-            {error && <div className={styles.error}>{error}</div>}
-            {successMessage && <div className={styles.success}>{successMessage}</div>}
             <div className={styles.formGroup}>
               <label className={styles.label}>Serial Number</label>
               <input 
