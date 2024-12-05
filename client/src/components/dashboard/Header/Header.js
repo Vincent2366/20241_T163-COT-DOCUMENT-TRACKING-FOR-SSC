@@ -35,10 +35,12 @@ export function Header() {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
-    if (userData) {
+    if (!userData) {
+      navigate('/');
+    } else {
       setUser(userData);
     }
-  }, []);
+  }, [navigate]);
 
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar);
@@ -77,10 +79,8 @@ export function Header() {
     try {
       // Clear any local storage or session storage items
       localStorage.removeItem('user'); // Adjust this based on your storage method
-      sessionStorage.clear();
-
-      // Reset any authentication state in your app
-      // setIsAuthenticated(false); // Uncomment if you have this state
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('token');
 
       // Close the profile menu
       setShowProfileMenu(false);
