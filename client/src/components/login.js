@@ -17,6 +17,9 @@ const Login = () => {
   });
   const [error, setError] = useState('');
 
+  // Check if user is already authenticated
+  const isAuthenticated = !!localStorage.getItem('token');
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -46,9 +49,11 @@ const Login = () => {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        // Reset reCAPTCHA
-        recaptchaRef.current.reset();
-        setIsCaptchaVerified(false);
+        // Reset reCAPTCHA only if the user is not authenticated
+        if (!isAuthenticated) {
+            recaptchaRef.current.reset();
+            setIsCaptchaVerified(false);
+        }
 
         // Route based on role and status
         if (data.user.role === 'admin') {
@@ -74,22 +79,31 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (!recaptchaRef.current.getValue()) {
+    // Only check reCAPTCHA if the user is not authenticated
+    if (!isAuthenticated && !recaptchaRef.current.getValue()) {
         setError("Please complete the reCAPTCHA");
         return;
     }
 
+    // Set a timeout for the login request
+    const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Login request timed out')), 10000) // 10 seconds timeout
+    );
+
     try {
-        const response = await fetch('http://localhost:2000/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: formData.email.toLowerCase(),
-                password: formData.password
+        const response = await Promise.race([
+            fetch('http://localhost:2000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email.toLowerCase(),
+                    password: formData.password
+                }),
             }),
-        });
+            timeout // Include the timeout promise
+        ]);
 
         const data = await response.json();
 
@@ -122,7 +136,7 @@ const Login = () => {
         recaptchaRef.current.reset();
         setIsCaptchaVerified(false);
     } 
-  };
+};
 
   return (
     <div className="login-container">
@@ -175,7 +189,7 @@ const Login = () => {
            <Link to="/forgot-password" className="forgot-password">Forgot Password?</Link>
 
             <ReCAPTCHA
-              sitekey="6LdeY2oqAAAAAGSi81scus4rs5Rz8WM8yeWcdfrZ"
+              sitekey="6LcbapsqAAAAAEJ_mP6zim1GU1pbbcLe6RQLQ_08"
               ref={recaptchaRef}
               onChange={handleCaptchaChange}
             />
