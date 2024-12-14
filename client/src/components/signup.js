@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './signin.css';
 import logo from '../assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
+import FeedbackMessage from './feedbackMessage';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Signup = () => {
     organization: ''
   });
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [organizations, setOrganizations] = useState([]);
 
@@ -44,6 +46,7 @@ const Signup = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -88,7 +91,7 @@ const Signup = () => {
       }
 
       // Registration successful
-      alert('Registration successful! Please wait for admin approval.');
+      setSuccessMessage('Registration successful! Please wait for admin approval.');
       navigate('/'); // Redirect to login page
     } catch (error) {
       setError(error.message || 'Registration failed');
@@ -111,7 +114,8 @@ const Signup = () => {
             <p style={{ fontSize: '14px' }}><br />Have an account?<br /> <Link to="/" className="signup-link">Sign In</Link></p>
           </div>
           <h1>Sign Up</h1>
-          {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+          {error && <FeedbackMessage message={error} type="error" />}
+          {successMessage && <FeedbackMessage message={successMessage} type="success" />}
           <form onSubmit={handleSubmit}>
             <label htmlFor="email">Enter your university Email Address</label>
             <input 
