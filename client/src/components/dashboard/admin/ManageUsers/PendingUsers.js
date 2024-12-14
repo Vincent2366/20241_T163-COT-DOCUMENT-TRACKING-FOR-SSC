@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import styles from './ManageUserUI.module.css';
+import ConfirmationModal from '../../../confirmationModal';
 import FeedbackMessage from '../../../feedbackMessage';
+import styles from './ManageUserUI.module.css';
 
 const PendingUsers = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
@@ -11,6 +12,9 @@ const PendingUsers = () => {
   const itemsPerPage = 10;
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     fetchPendingUsers();
@@ -34,40 +38,39 @@ const PendingUsers = () => {
     }
   };
 
-  const handleApprove = async (userId) => {
-    if (!window.confirm("Are you sure you want to approve this user?")) {
-      return;
-    }
+  const handleApprove = (userId) => {
+    setCurrentUserId(userId);
+    setModalMessage("Are you sure you want to approve this user?");
+    setIsModalOpen(true);
+  };
 
+  const confirmApproval = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:2000/api/users/approve/${userId}`, {
+      const response = await fetch(`http://localhost:2000/api/users/approve/${currentUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        },
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to approve user');
       }
-
-      const result = await response.json();
-      console.log('Approval result:', result);
 
       setFeedbackMessage('User approved successfully! ✅');
       setFeedbackType('success');
-      setTimeout(() => setFeedbackMessage(''), 3000);
-
       await fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
-      setError(error.message);
       setFeedbackMessage('Error approving user.');
       setFeedbackType('error');
-      setTimeout(() => setFeedbackMessage(''), 3000);
+    } finally {
+      setIsModalOpen(false);
     }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
   };
 
   const filteredData = searchTerm
@@ -180,6 +183,13 @@ const PendingUsers = () => {
           &gt;
         </button>
       </div>
+
+      <ConfirmationModal 
+        isOpen={isModalOpen} 
+        onClose={handleModalClose} 
+        onConfirm={confirmApproval} 
+        message={modalMessage} 
+      />
     </div>
   );
 };
