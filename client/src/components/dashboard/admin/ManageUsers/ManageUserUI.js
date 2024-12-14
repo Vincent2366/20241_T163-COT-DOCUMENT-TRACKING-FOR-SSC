@@ -1,6 +1,7 @@
 import styles from './ManageUserUI.module.css';
 import { useState, useEffect } from 'react';
 import FeedbackMessage from '../../../feedbackMessage';
+import ConfirmationModal from '../../../confirmationModal';
 
 export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {  
   const [loading, setLoading] = useState(true);
@@ -10,6 +11,12 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
   const itemsPerPage = 10; 
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [currentStatusUserId, setCurrentStatusUserId] = useState(null);
+  const [currentStatus, setCurrentStatus] = useState('');
 
   useEffect(() => {
     if (users.length > 0) {
@@ -48,13 +55,15 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
     }
   };
 
-  const handleDelete = async (userID) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) {
-      return; 
-    }
+  const handleDelete = (userID) => {
+    setCurrentUserId(userID);
+    setModalMessage("Are you sure you want to delete this user?");
+    setIsModalOpen(true);
+  };
 
+  const confirmDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:2000/api/users/${userID}`, {
+      const response = await fetch(`http://localhost:2000/api/users/${currentUserId}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json'
@@ -67,8 +76,8 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      onDeleteUser(userID);
-      console.log('User deleted successfully:', userID);
+      onDeleteUser(currentUserId);
+      console.log('User deleted successfully:', currentUserId);
       setFeedbackMessage('User deleted successfully! ✅');
       setFeedbackType('success');
       setTimeout(() => setFeedbackMessage(''), 2000);
@@ -78,48 +87,57 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
       setFeedbackType('error');
       setTimeout(() => setFeedbackMessage(''), 3000);
     }
+    setIsModalOpen(false);
   };
 
-  const toggleUserStatus = async (userID, currentStatus) => {
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const toggleUserStatus = (userID, currentStatus) => {
+    setCurrentStatusUserId(userID);
+    setCurrentStatus(currentStatus);
+    setModalMessage(currentStatus === 'active' 
+      ? 'Are you sure you want to Freeze this User?' 
+      : 'Are you sure you want to Unfreeze this User?');
+    setIsStatusModalOpen(true);
+  };
+
+  const confirmStatusChange = async () => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-
-    // Confirmation prompt
-    const confirmationMessage = currentStatus === 'active' 
-        ? `Are you sure you want to Freeze this User?` 
-        : `Are you sure you want to Unfreeze this User?`;
-
-    if (!window.confirm(confirmationMessage)) {
-        return; // Exit if the user cancels
-    }
-
     // Optimistically update the UI
-    onUpdateUserStatus(userID, newStatus);
+    onUpdateUserStatus(currentStatusUserId, newStatus);
 
     try {
-        const response = await fetch(`http://localhost:2000/api/users/${userID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ status: newStatus })
-        });
+      const response = await fetch(`http://localhost:2000/api/users/${currentStatusUserId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Error details:', errorData);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error details:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        console.log(`User status updated successfully: ${userID}, ${newStatus}`);
-        setFeedbackMessage(`User ${newStatus === 'inactive' ? 'frozen' : 'unfrozen'} successfully! ✅`);
-        setFeedbackType('success');
-        setTimeout(() => setFeedbackMessage(''), 2000);
+      console.log(`User status updated successfully: ${currentStatusUserId}, ${newStatus}`);
+      setFeedbackMessage(`User ${newStatus === 'inactive' ? 'frozen' : 'unfrozen'} successfully! ✅`);
+      setFeedbackType('success');
+      setTimeout(() => setFeedbackMessage(''), 2000);
     } catch (error) {
-        setFeedbackMessage('Error updating user status.');
-        setFeedbackType('error');
-        setTimeout(() => setFeedbackMessage(''), 3000);
+      setFeedbackMessage('Error updating user status.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
     }
+    setIsStatusModalOpen(false);
+  };
+
+  const handleStatusModalClose = () => {
+    setIsStatusModalOpen(false);
   };
 
   if (loading) {
@@ -220,6 +238,18 @@ export function ManageUserUI({ users, onDeleteUser, onUpdateUserStatus }) {
            &gt;
         </button>
       </div>
+      <ConfirmationModal 
+        isOpen={isModalOpen} 
+        onClose={handleModalClose} 
+        onConfirm={confirmDelete} 
+        message={modalMessage} 
+      />
+      <ConfirmationModal 
+        isOpen={isStatusModalOpen} 
+        onClose={handleStatusModalClose} 
+        onConfirm={confirmStatusChange} 
+        message={modalMessage} 
+      />
     </div>
   );
 }

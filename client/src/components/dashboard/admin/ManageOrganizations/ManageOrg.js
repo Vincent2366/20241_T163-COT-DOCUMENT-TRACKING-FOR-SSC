@@ -1,6 +1,7 @@
 import styles from './ManageOrg.module.css';
 import { useState, useEffect } from 'react';
 import FeedbackMessage from '../../../feedbackMessage';
+import ConfirmationModal from '../../../confirmationModal';
 
 export function ManageOrg() {
   const [selectedOrg, setSelectedOrg] = useState(null);
@@ -13,6 +14,9 @@ export function ManageOrg() {
   const [editOrg, setEditOrg] = useState({ id: '', name: '', status: '' });
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentOrgId, setCurrentOrgId] = useState(null);
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -110,27 +114,31 @@ export function ManageOrg() {
     }
   };
 
-  const handleDelete = async (orgId) => {
-    if (!window.confirm("Are you sure you want to delete this organization?")) {
-      return; // Exit if the user cancels
-    }
-  
+  const handleDelete = (orgId) => {
+    setCurrentOrgId(orgId);
+    setModalMessage("Are you sure you want to delete this organization?");
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!currentOrgId) return;
+
     try {
-      const response = await fetch(`http://localhost:2000/api/organizations/${orgId}`, {
+      const response = await fetch(`http://localhost:2000/api/organizations/${currentOrgId}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json'
         }
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error details:', errorData);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
-      setOrgData((prevData) => prevData.filter((org) => org._id !== orgId));
-      console.log('Organization deleted successfully:', orgId);
+
+      setOrgData((prevData) => prevData.filter((org) => org._id !== currentOrgId));
+      console.log('Organization deleted successfully:', currentOrgId);
       setFeedbackMessage('Organization deleted successfully! ✅');
       setFeedbackType('success');
       setTimeout(() => setFeedbackMessage(''), 2000);
@@ -140,8 +148,13 @@ export function ManageOrg() {
       setFeedbackType('error');
       setTimeout(() => setFeedbackMessage(''), 3000);
     }
+    setIsModalOpen(false);
   };
-  
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -257,6 +270,13 @@ export function ManageOrg() {
           </div>
         </div>
       )}
+
+      <ConfirmationModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        onConfirm={confirmDelete} 
+        message={modalMessage} 
+      />
     </div>
   );
 }
