@@ -3,7 +3,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 27px 26px;
-  background-color: #fff;
+  background-color: #ffffff; /* Ghost white */
+  color: #003366; /* Dark blue text for contrast */
   box-shadow: 0 4px 20px rgba(218, 218, 218, 1);
 }
 
@@ -56,12 +57,12 @@
 
 .userName {
   font-weight: 600;
-  color: #969696;
+  color: black;
 }
 
 .userEmail {
   font-weight: 300;
-  color: #969696;
+  color: black;
 }
 
 .userAvatar {

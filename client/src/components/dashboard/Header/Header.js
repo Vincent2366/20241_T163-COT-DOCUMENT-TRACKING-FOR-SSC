@@ -139,7 +139,7 @@ export function Header() {
           alt="Logo" 
           className={styles.logo}
         />
-        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/afae7e68f233fb9ccd60978ad0ed1cf569a5748d87997d3f6cdf60cd8ea424c1?placeholderIfAbsent=true&apiKey=1194e150faa74888af77be55eb83006a" alt="Secondary Logo" className={styles.secondaryLogo} />
+        
       </div>
       <div className={styles.userSection}>
         <nav className={styles.headerNav}>
