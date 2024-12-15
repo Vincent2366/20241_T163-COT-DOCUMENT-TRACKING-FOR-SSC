@@ -208,7 +208,11 @@ const Transactions = ({ organization }) => {
             <option value="oldest">Oldest</option>
             </select>
         </div>
+        <div className={styles.exportButton}>
+          <ExportButton organizationId={organization} />
         </div>
+        </div>
+        
     </header>
     <div className={styles.transactionsContainer}>
       <table className={styles.transactionTable}>
@@ -221,9 +225,7 @@ const Transactions = ({ organization }) => {
             <th>Recipient</th>
             <th>Created At</th>
             <th>Current Office</th>
-            <th className={styles.exportButton}>
-            <ExportButton organizationId={organization} />
-        </th>
+            
         </tr>
         </thead>
         <tbody>
