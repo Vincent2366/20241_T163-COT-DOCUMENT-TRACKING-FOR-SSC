@@ -167,7 +167,7 @@ const Login = () => {
           </GoogleOAuthProvider>
       
           <form onSubmit={handleSubmit}>
-            <label>Enter your username or email address</label>
+            <label>Enter your email address</label>
             <input 
               type="text" 
               name="email"
