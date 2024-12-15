@@ -15,15 +15,49 @@
 
 .exportButton:disabled {
     cursor: not-allowed;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .sheetsIcon {
-    width: 25px;  /* Adjust size as needed */
+    width: 30px;  /* Adjust size as needed */
     height: 30px;
 }
 
 .loadingText {
-    font-size: 8px;
+    font-size: 14px;
     color: #666;
-} 
+}
+
+.datePickerContainer {
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+    gap: 5px; /* Space between date pickers and button */
+}
+
+.datePickerWrapper {
+    position: relative; /* Ensure the wrapper is positioned relative */
+    height: 20px; /* Set a fixed height to prevent shifting */
+}
+
+.datePicker {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px;
+    width: 100px; /* Set a fixed width */
+    font-size: 14px;
+    height: 15px; /* Set a fixed height */
+}
+
+/* Adjust placeholder text size */
+.react-datepicker__input-container input {
+    color: #999;
+    font-size: 10px; /* Adjust the font size for the input */
+    height: 40px; /* Set a fixed height for the input */
+}
+
+.react-datepicker__input-container input::placeholder {
+    font-size: 10px; /* Adjust the placeholder text size */
+    color: #999; /* Optional: Change placeholder color */
+}
+
+
