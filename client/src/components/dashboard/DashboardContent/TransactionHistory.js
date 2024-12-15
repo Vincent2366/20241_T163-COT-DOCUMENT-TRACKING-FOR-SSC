@@ -1,6 +1,8 @@
 import styles from './TransactionHistory.module.css';
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import FeedbackMessage from '../../feedbackMessage';
+import ConfirmationModal from '../../confirmationModal';
 
 export function TransactionHistory() {
   const location = useLocation();
@@ -16,6 +18,11 @@ export function TransactionHistory() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [feedbackMessage, setFeedbackMessage] = useState(null);
+  const [feedbackType, setFeedbackType] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentDocumentId, setCurrentDocumentId] = useState(null);
 
   console.log('current filterType', filterType);
   useEffect(() => {
@@ -182,47 +189,41 @@ export function TransactionHistory() {
         throw new Error(`Server returned ${response.status}`);
       }
 
-      // If changing from Accept to pending, send notification to sender
-      if (currentStatus === 'Accept' && newStatus === 'pending') {
-        const document = documentData.find(doc => doc._id === documentId);
-        if (document) {
-          console.log('Sending acceptance notification for document:', document);
-          
-          const notificationResponse = await fetch('http://localhost:2000/api/notifications/acceptance-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              documents: [document]
-            })
-          });
+      // Show feedback message
+      setFeedbackMessage(`Status updated to ${newStatus}`);
+      setFeedbackType('success');
+      setTimeout(() => setFeedbackMessage(null), 3000);
 
-          if (!notificationResponse.ok) {
-            const errorData = await notificationResponse.json();
-            console.error('Failed to send acceptance notification:', {
-              status: notificationResponse.status,
-              error: errorData
-            });
-          } else {
-            console.log('Acceptance notification sent successfully');
-          }
-        } else {
-          console.error('Document not found in documentData:', documentId);
-        }
-      }
+      // Refresh document data
+      const updatedDocumentData = await fetchDocumentData();
+      setDocumentData(updatedDocumentData);
 
-      // Update the local state
-      setDocumentData(prevData => 
-        prevData.map(doc => 
-          doc._id === documentId ? { ...doc, status: newStatus } : doc
-        )
-      );
     } catch (error) {
       console.error('Error in handleStatusChange:', error);
-      alert('Failed to update status. Please try again.');
+      setFeedbackMessage('Failed to update status. Please try again.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(null), 3000);
     }
+  };
+
+  const fetchDocumentData = async () => {
+    let url = 'http://localhost:2000/api/documents/all';
+    if (filterType === 'all' && userOrganization) {
+      const encodedOrg = encodeURIComponent(userOrganization);
+      url = `http://localhost:2000/api/documents/organization/${encodedOrg}`;
+    }
+    const response = await fetch(url);
+    return await response.json();
+  };
+
+  const handleConfirm = (documentId) => {
+    setCurrentDocumentId(documentId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalConfirm = () => {
+    handleStatusChange(currentDocumentId, 'Accept');
+    setIsModalOpen(false);
   };
 
   const formatHistoryDate = (dateString) => {
@@ -259,6 +260,13 @@ export function TransactionHistory() {
 
   return (
     <section className={styles.historySection}>
+      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
+      <ConfirmationModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onConfirm={handleModalConfirm} 
+        message="Are you sure you want to change the status?" 
+      />
       <header className={styles.historyHeader}>
         <h1 className={styles.historyTitle}>{getHeaderTitle()}</h1>
         <div className={styles.controls}>
@@ -329,7 +337,7 @@ export function TransactionHistory() {
                   <button 
                     className={transaction.status === 'Accept' ? styles.acceptButton : styles.pendingButton}
                     type="button"
-                    onClick={() => handleStatusChange(transaction._id, transaction.status)}
+                    onClick={() => handleConfirm(transaction._id)}
                   >
                     {transaction.status}
                   </button>

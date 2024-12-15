@@ -104,7 +104,7 @@ const SideNavigation = () => {
 
     if (userOrg) {
       fetchStatusCounts();
-      const interval = setInterval(fetchStatusCounts, 60000);
+      const interval = setInterval(fetchStatusCounts, 2000);
       return () => clearInterval(interval);
     }
   }, [userOrg]); // Depend on userOrg
