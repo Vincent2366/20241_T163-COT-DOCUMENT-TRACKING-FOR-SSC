@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './forpass.css';
 import logo from '../assets/logo.png';
-import { useNavigate } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const ForgotPassword = () => {
               You may receive a code to your institutional account for security and login purposes
             </label>
             {error && <p style={{ color: 'red', margin: '10px 0' }}>{error}</p>}
-            <br />
+            
             <button 
               type="submit" 
               className="sign-in-btn"
@@ -72,6 +72,7 @@ const ForgotPassword = () => {
             >
               {loading ? 'Sending...' : 'Continue'}
             </button>
+            <p style={{ fontSize: '14px', textAlign: 'center' }}><br />Back to <Link to="/" className="signup-link">Login</Link></p>
           </form>
         </div>
       </div>
