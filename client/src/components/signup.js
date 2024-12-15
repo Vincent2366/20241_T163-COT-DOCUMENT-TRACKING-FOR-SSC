@@ -111,7 +111,7 @@ const Signup = () => {
         <div className="form-content1">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ color: 'skyblue' }}>Welcome to <span style={{ color: '#448EE4', fontWeight: 'bold' }}>DocuTrack</span></h2>
-            <p style={{ fontSize: '14px' }}><br />Have an account?<br /> <Link to="/" className="signup-link">Sign In</Link></p>
+            
           </div>
           <h1>Sign Up</h1>
           {error && <FeedbackMessage message={error} type="error" />}
@@ -233,7 +233,7 @@ const Signup = () => {
               onChange={handleChange}
               minLength="6"
             />
-            <br/>
+           
             <button 
               type="submit" 
               className="sign-in-btn" 
@@ -241,6 +241,7 @@ const Signup = () => {
             >
               {isLoading ? 'Signing up...' : 'Sign up'}
             </button>
+            <p style={{ fontSize: '14px', textAlign: 'center' }}><br />Have an account? <Link to="/" className="signup-link">Login</Link></p>
           </form>
         </div>
       </div>
