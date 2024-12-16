@@ -1,8 +1,8 @@
 import styles from './TransactionHistory.module.css';
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import FeedbackMessage from '../../feedbackMessage';
 import ConfirmationModal from '../../confirmationModal';
+import FeedbackMessage from '../../feedbackMessage';
 
 export function TransactionHistory() {
   const location = useLocation();
@@ -19,10 +19,10 @@ export function TransactionHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [currentDocumentId, setCurrentDocumentId] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [feedbackType, setFeedbackType] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentDocumentId, setCurrentDocumentId] = useState(null);
 
   console.log('current filterType', filterType);
   useEffect(() => {
@@ -168,12 +168,17 @@ export function TransactionHistory() {
   };
 
   const handleStatusChange = async (documentId, currentStatus) => {
+    setCurrentDocumentId(documentId);
+    setShowConfirmation(true);
+  };
+
+  const confirmStatusChange = async () => {
+    const currentStatus = documentData.find(doc => doc._id === currentDocumentId)?.status;
+    const newStatus = currentStatus === 'Accept' ? 'pending' : 'Accept';
+    const token = localStorage.getItem('token');
+
     try {
-      const newStatus = currentStatus === 'Accept' ? 'pending' : 'Accept';
-      const token = localStorage.getItem('token');
-      
-      // Update status
-      const response = await fetch(`http://localhost:2000/api/documents/update-status/${documentId}`, {
+      const response = await fetch(`http://localhost:2000/api/documents/update-status/${currentDocumentId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -181,7 +186,7 @@ export function TransactionHistory() {
         },
         body: JSON.stringify({ 
           status: newStatus,
-          documentId: documentId
+          documentId: currentDocumentId
         })
       });
 
@@ -189,41 +194,60 @@ export function TransactionHistory() {
         throw new Error(`Server returned ${response.status}`);
       }
 
-      // Show feedback message
-      setFeedbackMessage(`Status updated to ${newStatus}`);
-      setFeedbackType('success');
-      setTimeout(() => setFeedbackMessage(null), 3000);
+      if (currentStatus === 'Accept' && newStatus === 'pending') {
+        const document = documentData.find(doc => doc._id === currentDocumentId);
+        if (document) {
+          console.log('Sending acceptance notification for document:', document);
+          
+          const notificationResponse = await fetch('http://localhost:2000/api/notifications/acceptance-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              documents: [document]
+            })
+          });
 
-      // Refresh document data
-      const updatedDocumentData = await fetchDocumentData();
-      setDocumentData(updatedDocumentData);
+          if (!notificationResponse.ok) {
+            const errorData = await notificationResponse.json();
+            console.error('Failed to send acceptance notification:', {
+              status: notificationResponse.status,
+              error: errorData
+            });
+          } else {
+            console.log('Acceptance notification sent successfully');
+          }
+        } else {
+          console.error('Document not found in documentData:', currentDocumentId);
+        }
+      }
+
+      setDocumentData(prevData => 
+        prevData.map(doc => 
+          doc._id === currentDocumentId ? { ...doc, status: newStatus } : doc
+        )
+      );
+
+      setFeedbackMessage('Status updated successfully.');
+      setFeedbackType('success');
+      
+      setTimeout(() => {
+        setFeedbackMessage(null);
+      }, 3000);
 
     } catch (error) {
       console.error('Error in handleStatusChange:', error);
       setFeedbackMessage('Failed to update status. Please try again.');
       setFeedbackType('error');
-      setTimeout(() => setFeedbackMessage(null), 3000);
+
+      setTimeout(() => {
+        setFeedbackMessage(null);
+      }, 3000);
+    } finally {
+      setShowConfirmation(false);
     }
-  };
-
-  const fetchDocumentData = async () => {
-    let url = 'http://localhost:2000/api/documents/all';
-    if (filterType === 'all' && userOrganization) {
-      const encodedOrg = encodeURIComponent(userOrganization);
-      url = `http://localhost:2000/api/documents/organization/${encodedOrg}`;
-    }
-    const response = await fetch(url);
-    return await response.json();
-  };
-
-  const handleConfirm = (documentId) => {
-    setCurrentDocumentId(documentId);
-    setIsModalOpen(true);
-  };
-
-  const handleModalConfirm = () => {
-    handleStatusChange(currentDocumentId, 'Accept');
-    setIsModalOpen(false);
   };
 
   const formatHistoryDate = (dateString) => {
@@ -260,13 +284,6 @@ export function TransactionHistory() {
 
   return (
     <section className={styles.historySection}>
-      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
-      <ConfirmationModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onConfirm={handleModalConfirm} 
-        message="Are you sure you want to change the status?" 
-      />
       <header className={styles.historyHeader}>
         <h1 className={styles.historyTitle}>{getHeaderTitle()}</h1>
         <div className={styles.controls}>
@@ -337,7 +354,7 @@ export function TransactionHistory() {
                   <button 
                     className={transaction.status === 'Accept' ? styles.acceptButton : styles.pendingButton}
                     type="button"
-                    onClick={() => handleConfirm(transaction._id)}
+                    onClick={() => handleStatusChange(transaction._id, transaction.status)}
                   >
                     {transaction.status}
                   </button>
@@ -415,6 +432,13 @@ export function TransactionHistory() {
           &gt; 
         </button>
       </div>
+      <FeedbackMessage message={feedbackMessage} type={feedbackType} />
+      <ConfirmationModal 
+        isOpen={showConfirmation} 
+        onClose={() => setShowConfirmation(false)} 
+        onConfirm={confirmStatusChange} 
+        message="Are you sure you want to change the status?" 
+      />
     </section>
   );
 }
