@@ -6,8 +6,8 @@ import styles from './Header.module.css';
 import axios from 'axios';
 import logo from '../../../assets/logo2.png';
 
-const CLIENT_ID = '465216288473-9t6vhd30arvjfjtogqinvbtj9a6vnmjc.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyCAq7zCrb2WvN03qb52D0FHsPfY3OEzO-o';
+const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
+const API_KEY = process.env.REACT_APP_API_KEY;
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 
