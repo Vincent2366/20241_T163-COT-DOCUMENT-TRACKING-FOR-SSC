@@ -59,11 +59,16 @@ const PendingUsers = () => {
 
       setFeedbackMessage('User approved successfully! ✅');
       setFeedbackType('success');
+      
+      setTimeout(() => {setFeedbackMessage('');}, 3000);
+
       await fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
       setFeedbackMessage('Error approving user.');
       setFeedbackType('error');
+      setTimeout(() => {setFeedbackMessage('');}, 3000);
+      
     } finally {
       setIsModalOpen(false);
     }
