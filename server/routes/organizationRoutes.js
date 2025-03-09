@@ -11,6 +11,10 @@ router.get('/:id', OrganizationController.getOrganizationById);
 router.put('/:id', OrganizationController.updateOrganization);
 router.delete('/:id', OrganizationController.deleteOrganization);
 
+// New routes for locking mechanism
+router.post('/:id/lock', OrganizationController.lockOrganization);
+router.post('/:id/unlock', OrganizationController.unlockOrganization);
+
 // Get all active organizations
 router.get('/', organizationHandler.getOrganization);
 

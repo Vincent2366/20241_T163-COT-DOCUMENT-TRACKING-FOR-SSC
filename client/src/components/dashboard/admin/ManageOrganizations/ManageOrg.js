@@ -58,19 +58,76 @@ export function ManageOrg() {
   // Slice the data for the current page
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleEdit = (org) => {
-    setEditOrg({ id: org._id, name: org.name, status: org.status });
-    setIsEditModalOpen(true);
+  const handleEdit = async (org) => {
+    try {
+      console.log('handleEdit started for org:', org._id);
+      const response = await fetch(`http://localhost:2000/api/organizations/${org._id}/lock`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      // Log the raw response
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        const textResponse = await response.text();
+        console.error('Error response body:', textResponse);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Lock status response:', data);
+
+      if (data.success) {
+        console.log('Organization locked successfully, opening modal');
+        setEditOrg({ 
+          id: org._id, 
+          name: org.name, 
+          status: org.status,
+          editKey: data.editKey 
+        });
+        setIsEditModalOpen(true);
+      } else {
+        setFeedbackMessage(data.message || 'Organization is currently being edited by another user');
+        setFeedbackType('error');
+        setTimeout(() => setFeedbackMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error("Error in handleEdit:", error);
+      setFeedbackMessage('Another user is editing this Organization. Please try again.');
+      setFeedbackType('error');
+      setTimeout(() => setFeedbackMessage(''), 3000);
+    }
   };
 
   const handleModalClose = () => {
+    if (editOrg.id && editOrg.editKey) {
+      // Release the lock when modal is closed without saving
+      fetch(`http://localhost:2000/api/organizations/${editOrg.id}/unlock`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          editKey: editOrg.editKey
+        })
+      }).catch(error => console.error('Error releasing lock:', error));
+    }
     setIsEditModalOpen(false);
+    setEditOrg({ id: '', name: '', status: '' });
   };
 
   const handleSave = async () => {
-    console.log('Saving organization:', editOrg);
     if (!editOrg.name || !editOrg.status) {
-      console.error('Name and status are required fields.');
+      setFeedbackMessage('Name and status are required fields.');
+      setFeedbackType('error');
       return;
     }
 
@@ -79,10 +136,12 @@ export function ManageOrg() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           name: editOrg.name,
           status: editOrg.status,
+          editKey: editOrg.editKey
         }),
       });
 
@@ -111,6 +170,22 @@ export function ManageOrg() {
       setFeedbackMessage('Error updating organization.');
       setFeedbackType('error');
       setTimeout(() => setFeedbackMessage(''), 3000);
+    } finally {
+      // Release the lock when done
+      try {
+        await fetch(`http://localhost:2000/api/organizations/${editOrg.id}/unlock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            editKey: editOrg.editKey
+          })
+        });
+      } catch (error) {
+        console.error('Error releasing lock:', error);
+      }
     }
   };
 

@@ -1,4 +1,5 @@
 const Organization = require('../models/Organization'); // Import your Organization model
+const crypto = require('crypto');
 
 class OrganizationController {
   // Create a new organization
@@ -64,8 +65,25 @@ class OrganizationController {
   // Update an organization
   static async updateOrganization(req, res) {
     try {
-      const { id } = req.params;
-      const updatedOrganization = await Organization.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+      const { editKey } = req.body;
+      const organization = await Organization.findById(req.params.id);
+      
+      if (!organization) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Organization not found' 
+        });
+      }
+
+      // Verify edit key
+      if (organization.editKey !== editKey) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Invalid edit key' 
+        });
+      }
+
+      const updatedOrganization = await Organization.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
       if (!updatedOrganization) {
         return res.status(404).json({ message: 'Organization not found' });
       }
@@ -89,6 +107,91 @@ class OrganizationController {
       res.status(204).send(); // No content
     } catch (error) {
       res.status(500).json({ message: 'Error deleting organization', error });
+    }
+  }
+
+  // Lock an organization for editing
+  static async lockOrganization(req, res) {
+    try {
+      const organization = await Organization.findById(req.params.id);
+      
+      if (!organization) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Organization not found' 
+        });
+      }
+
+      // Check if organization is already locked
+      if (organization.isLocked()) {
+        return res.status(409).json({ 
+          success: false, 
+          message: 'Organization is currently being edited by another user' 
+        });
+      }
+
+      // Generate a new edit key
+      const editKey = crypto.randomBytes(32).toString('hex');
+      
+      // Update organization with lock information
+      organization.editKey = editKey;
+      organization.editLockedAt = new Date();
+      organization.editLockedBy = req.user?.id || 'unknown'; // Assuming you have user info in req.user
+      
+      await organization.save();
+
+      res.json({ 
+        success: true, 
+        message: 'Organization locked successfully',
+        editKey: editKey 
+      });
+    } catch (error) {
+      console.error('Lock error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error locking organization' 
+      });
+    }
+  }
+
+  // Unlock an organization
+  static async unlockOrganization(req, res) {
+    try {
+      const { editKey } = req.body;
+      const organization = await Organization.findById(req.params.id);
+      
+      if (!organization) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Organization not found' 
+        });
+      }
+
+      // Verify edit key
+      if (organization.editKey !== editKey) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Invalid edit key' 
+        });
+      }
+
+      // Remove lock
+      organization.editKey = null;
+      organization.editLockedAt = null;
+      organization.editLockedBy = null;
+      
+      await organization.save();
+
+      res.json({ 
+        success: true, 
+        message: 'Organization unlocked successfully' 
+      });
+    } catch (error) {
+      console.error('Unlock error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error unlocking organization' 
+      });
     }
   }
 }

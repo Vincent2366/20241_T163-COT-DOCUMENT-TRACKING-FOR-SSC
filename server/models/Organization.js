@@ -22,8 +22,26 @@ const organizationSchema = new mongoose.Schema({
         type: String,
         enum: ['Active', 'Inactive'],
         default: 'Active'
+    },
+    editKey: {
+        type: String,
+        default: null,
+        expires: 300 // Key will automatically expire after 5 minutes
+    },
+    editLockedAt: {
+        type: Date,
+        default: null
+    },
+    editLockedBy: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
+
+// Add method to check if organization is locked
+organizationSchema.methods.isLocked = function() {
+    return this.editKey !== null && this.editLockedAt !== null;
+};
 
 const Organization = mongoose.model('Organization', organizationSchema);
 

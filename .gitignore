@@ -9,3 +9,5 @@ client/package-lock.json
 server/package-lock.json
 
 .env
+
+node_modules
