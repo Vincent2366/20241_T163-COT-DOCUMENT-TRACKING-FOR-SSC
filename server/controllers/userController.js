@@ -222,37 +222,35 @@ class UserController {
         fs.mkdirSync(uploadsDir, { recursive: true });
       }
 
-      // Save file locally
+      // Save file locally first
       const fileName = `${Date.now()}-${req.file.originalname}`;
       const localFilePath = path.join(uploadsDir, fileName);
       fs.writeFileSync(localFilePath, req.file.buffer);
 
-      // Upload to Google Drive
-      const driveResponse = await driveService.uploadFile(req.file);
+      // Try to upload to Google Drive, but don't fail if it doesn't work
+      let driveResponse = null;
+      try {
+        driveResponse = await driveService.uploadFile(req.file);
+      } catch (driveError) {
+        console.error('Google Drive upload failed:', driveError);
+        // Continue with local file only
+      }
 
       const user = await User.findById(req.user.id);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
 
-      // Delete old profile picture if exists
-      if (user.profilePictureId && user.localProfilePath) {
-        try {
-          await driveService.deleteFile(user.profilePictureId);
-          const oldLocalPath = path.join(uploadsDir, user.localProfilePath);
-          if (fs.existsSync(oldLocalPath)) {
-            fs.unlinkSync(oldLocalPath);
-          }
-        } catch (error) {
-          console.error('Error deleting old profile picture:', error);
-        }
-      }
-
-      // Update user profile
-      user.profilePictureId = driveResponse.id;
+      // Update user profile with local path
       user.profilePicture = `/uploads/profiles/${fileName}`;
-      user.driveFileLink = driveResponse.directLink;
       user.localProfilePath = fileName;
+      
+      // Add Drive info if available
+      if (driveResponse) {
+        user.profilePictureId = driveResponse.id;
+        user.driveFileLink = driveResponse.directLink;
+      }
+      
       await user.save();
 
       res.json({
@@ -266,7 +264,7 @@ class UserController {
 
     } catch (error) {
       console.error('Error in upload:', error);
-      res.status(500).json({ message: 'Error uploading profile picture' });
+      res.status(500).json({ message: 'Error uploading profile picture', error: error.message });
     }
   }
 }
